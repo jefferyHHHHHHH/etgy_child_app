@@ -1,0 +1,6 @@
+{
+  "APP_ENV": "dev",
+  "API_BASE_URL": "https://dev-api.example.com",
+  "AGORA_APP_ID": "",
+  "ENABLE_NETWORK_LOG": "true"
+}

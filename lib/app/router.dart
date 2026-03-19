@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/ai/pages/ai_tutor_page.dart';
 import '../features/auth/auth_controller.dart';
+import '../features/auth/auth_state.dart';
 import '../features/auth/pages/device_bind_page.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/favorites/pages/favorites_page.dart';
@@ -132,8 +133,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 class _GoRouterRefreshNotifier extends ChangeNotifier {
   _GoRouterRefreshNotifier(this.ref) {
     // Any auth state change should trigger router redirect evaluation.
-    ref.listen(authControllerProvider, (_, __) => notifyListeners());
+    _subscription = ref.listen<AuthState>(
+      authControllerProvider,
+      (previous, next) => notifyListeners(),
+    );
   }
 
   final Ref ref;
+  late final ProviderSubscription<AuthState> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.close();
+    super.dispose();
+  }
 }

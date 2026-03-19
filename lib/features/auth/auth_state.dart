@@ -6,12 +6,16 @@ class AuthState {
     required this.token,
     required this.user,
     required this.isDeviceBound,
+    required this.isLoading,
+    required this.errorMessage,
   });
 
   final AccountStatus status;
   final String? token;
   final UserProfile? user;
   final bool isDeviceBound;
+  final bool isLoading;
+  final String? errorMessage;
 
   bool get isLoggedIn => token != null;
 
@@ -20,12 +24,19 @@ class AuthState {
     String? token,
     UserProfile? user,
     bool? isDeviceBound,
+    bool? isLoading,
+    String? errorMessage,
+    bool clearToken = false,
+    bool clearUser = false,
+    bool clearError = false,
   }) {
     return AuthState(
       status: status ?? this.status,
-      token: token ?? this.token,
-      user: user ?? this.user,
+      token: clearToken ? null : (token ?? this.token),
+      user: clearUser ? null : (user ?? this.user),
       isDeviceBound: isDeviceBound ?? this.isDeviceBound,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
@@ -34,5 +45,7 @@ class AuthState {
     token: null,
     user: null,
     isDeviceBound: false,
+    isLoading: false,
+    errorMessage: null,
   );
 }

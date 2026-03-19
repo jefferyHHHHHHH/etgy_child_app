@@ -15,9 +15,7 @@ class DeviceBindPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              '首次登录需要绑定当前设备。绑定后，账号状态将从“待激活”变为“活跃”。',
-            ),
+            const Text('首次登录需要绑定当前设备。绑定后，账号状态将从“待激活”变为“活跃”。'),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () async {

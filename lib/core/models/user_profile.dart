@@ -1,8 +1,4 @@
-enum AccountStatus {
-  pendingActivation,
-  active,
-  frozen,
-}
+enum AccountStatus { pendingActivation, active, frozen }
 
 class UserProfile {
   const UserProfile({

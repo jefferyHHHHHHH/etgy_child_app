@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth_controller.dart';
+import '../auth_state.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -13,22 +14,42 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _accountController = TextEditingController();
   final _passwordController = TextEditingController();
+  late final ProviderSubscription<AuthState> _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSubscription = ref.listenManual(authControllerProvider, (previous, next) {
+      if (next.errorMessage != null && next.errorMessage!.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage!)),
+        );
+        ref.read(authControllerProvider.notifier).clearError();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _authSubscription.close();
     _accountController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _onLogin() async {
+    final authState = ref.read(authControllerProvider);
+    if (authState.isLoading) {
+      return;
+    }
+
     final account = _accountController.text.trim();
     final password = _passwordController.text;
 
     if (account.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入账号和密码')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入账号和密码')));
       return;
     }
 
@@ -39,6 +60,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('登录')),
       body: Padding(
@@ -67,8 +90,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: _onLogin,
-              child: const Text('登录'),
+              onPressed: authState.isLoading ? null : _onLogin,
+              child: authState.isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('登录'),
             ),
             const SizedBox(height: 12),
             Align(

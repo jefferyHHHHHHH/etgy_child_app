@@ -1,0 +1,13 @@
+generatorName: dart-dio
+inputSpec: ./openapi/openapi.yaml
+outputDir: ./lib/generated/openapi
+additionalProperties:
+  pubName: etgy_openapi_client
+  pubAuthor: etgy
+  pubVersion: 0.1.0
+  serializationLibrary: json_serializable
+  hideGenerationTimestamp: true
+globalProperties:
+  apis: true
+  models: true
+  supportingFiles: true
