@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/ai/pages/ai_tutor_page.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/auth/auth_state.dart';
+import '../features/auth/pages/auth_launch_page.dart';
 import '../features/auth/pages/device_bind_page.dart';
 import '../features/auth/pages/login_page.dart';
 import '../features/favorites/pages/favorites_page.dart';
@@ -21,6 +22,7 @@ import '../features/videos/pages/video_list_page.dart';
 import '../features/videos/pages/video_player_page.dart';
 
 class AppRoutes {
+  static const launch = '/launch';
   static const login = '/login';
   static const bindDevice = '/bind-device';
   static const home = '/';
@@ -45,11 +47,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.home,
+    initialLocation: AppRoutes.launch,
     refreshListenable: _GoRouterRefreshNotifier(ref),
     redirect: (context, state) {
+      final isLaunching = state.matchedLocation == AppRoutes.launch;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
       final isBinding = state.matchedLocation == AppRoutes.bindDevice;
+
+      if (authState.isHydrating) {
+        return isLaunching ? null : AppRoutes.launch;
+      }
+
+      if (isLaunching) {
+        if (!authState.isLoggedIn) {
+          return AppRoutes.login;
+        }
+        if (!authState.isDeviceBound) {
+          return AppRoutes.bindDevice;
+        }
+        return AppRoutes.home;
+      }
 
       if (!authState.isLoggedIn) {
         return isLoggingIn ? null : AppRoutes.login;
@@ -66,6 +83,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.launch,
+        builder: (context, state) => const AuthLaunchPage(),
+      ),
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginPage(),

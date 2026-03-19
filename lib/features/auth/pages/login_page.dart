@@ -72,6 +72,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: 24),
             const Placeholder(fallbackHeight: 80),
             const SizedBox(height: 24),
+            const Text('开发测试账号: 任意账号 / 密码 123456'),
+            const SizedBox(height: 8),
             TextField(
               controller: _accountController,
               decoration: const InputDecoration(

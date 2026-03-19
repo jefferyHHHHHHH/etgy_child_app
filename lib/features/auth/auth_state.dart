@@ -7,6 +7,7 @@ class AuthState {
     required this.user,
     required this.isDeviceBound,
     required this.isLoading,
+    required this.isHydrating,
     required this.errorMessage,
   });
 
@@ -15,6 +16,7 @@ class AuthState {
   final UserProfile? user;
   final bool isDeviceBound;
   final bool isLoading;
+  final bool isHydrating;
   final String? errorMessage;
 
   bool get isLoggedIn => token != null;
@@ -25,6 +27,7 @@ class AuthState {
     UserProfile? user,
     bool? isDeviceBound,
     bool? isLoading,
+    bool? isHydrating,
     String? errorMessage,
     bool clearToken = false,
     bool clearUser = false,
@@ -36,6 +39,7 @@ class AuthState {
       user: clearUser ? null : (user ?? this.user),
       isDeviceBound: isDeviceBound ?? this.isDeviceBound,
       isLoading: isLoading ?? this.isLoading,
+      isHydrating: isHydrating ?? this.isHydrating,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -46,6 +50,7 @@ class AuthState {
     user: null,
     isDeviceBound: false,
     isLoading: false,
+    isHydrating: true,
     errorMessage: null,
   );
 }

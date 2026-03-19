@@ -7,7 +7,3 @@ additionalProperties:
   pubVersion: 0.1.0
   serializationLibrary: json_serializable
   hideGenerationTimestamp: true
-globalProperties:
-  apis: true
-  models: true
-  supportingFiles: true
