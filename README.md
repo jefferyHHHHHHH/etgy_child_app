@@ -79,9 +79,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build_openapi_client.ps1
 
 生成代码目录：
 
-- `lib/generated/openapi`
+- `generated/openapi`
 
-注意：`lib/generated/openapi` 下代码不手改，每次以后端文档为准重新生成。
+注意：`generated/openapi` 下代码不手改，每次以后端文档为准重新生成。
 
 ## 5. 第一阶段已完成基础
 

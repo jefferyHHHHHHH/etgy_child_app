@@ -1,7 +1,7 @@
 param(
   [string]$InputSpecPath = "openapi/openapi.yaml",
   [string]$InputSpecUrl = "",
-  [string]$OutputDir = "lib/generated/openapi"
+  [string]$OutputDir = "generated/openapi"
 )
 
 $ErrorActionPreference = "Stop"

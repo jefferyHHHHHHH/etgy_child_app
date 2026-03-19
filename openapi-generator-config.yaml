@@ -1,6 +1,6 @@
 generatorName: dart-dio
 inputSpec: ./openapi/openapi.yaml
-outputDir: ./lib/generated/openapi
+outputDir: ./generated/openapi
 additionalProperties:
   pubName: etgy_openapi_client
   pubAuthor: etgy

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/providers/app_providers.dart';
+import '../core/theme/app_theme.dart';
 import 'router.dart';
 
 class EtgyChildApp extends ConsumerWidget {
@@ -13,6 +14,10 @@ class EtgyChildApp extends ConsumerWidget {
     final config = ref.watch(appConfigProvider);
     final title = config.isProd ? '益路同行' : '益路同行 (${config.flavor.name})';
 
-    return MaterialApp.router(title: title, routerConfig: router);
+    return MaterialApp.router(
+      title: title,
+      theme: AppTheme.lightTheme,
+      routerConfig: router,
+    );
   }
 }

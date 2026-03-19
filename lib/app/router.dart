@@ -44,12 +44,11 @@ class AppRoutes {
 }
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
-
   return GoRouter(
     initialLocation: AppRoutes.launch,
     refreshListenable: _GoRouterRefreshNotifier(ref),
     redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
       final isLaunching = state.matchedLocation == AppRoutes.launch;
       final isLoggingIn = state.matchedLocation == AppRoutes.login;
       final isBinding = state.matchedLocation == AppRoutes.bindDevice;

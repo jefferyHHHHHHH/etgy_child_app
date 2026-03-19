@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/errors/app_exception_mapper.dart';
@@ -11,15 +14,63 @@ final authControllerProvider = NotifierProvider<AuthController, AuthState>(
 );
 
 class AuthController extends Notifier<AuthState> {
+  bool _restoreStarted = false;
+
   @override
   AuthState build() {
-    _restoreSession();
+    // Important: `build()` may run more than once (e.g. provider rebuild).
+    // Never reset state back to hydrating=true after we've already started.
+    if (_restoreStarted) {
+      return state;
+    }
+
+    _restoreStarted = true;
+
+    if (kDebugMode) {
+      debugPrint('[AuthController] build() called; scheduling session restore');
+    }
+
+    Future.microtask(_restoreSession);
     return AuthState.unauthenticated;
   }
 
+  void forceStopHydration({String? message}) {
+    if (!state.isHydrating) {
+      return;
+    }
+
+    state = AuthState.unauthenticated.copyWith(
+      isHydrating: false,
+      errorMessage: message,
+    );
+  }
+
   Future<void> _restoreSession() async {
+    // Secondary watchdog: if something blocks long enough that Future.timeout
+    // doesn't get a chance to resolve, we still avoid an infinite launch spinner.
+    final watchdog = Timer(const Duration(seconds: 8), () {
+      if (state.isHydrating) {
+        if (kDebugMode) {
+          debugPrint('[AuthController] hydration watchdog fired');
+        }
+        forceStopHydration(message: '启动超时，请检查网络或重试');
+      }
+    });
+
     try {
-      final session = await ref.read(authRepositoryProvider).restoreSession();
+      // Defensive timeout: prevents the app from being stuck on the launch
+      // spinner forever if secure storage or platform channels hang.
+      if (kDebugMode) {
+        debugPrint('[AuthController] restoreSession() begin');
+      }
+      final session = await ref
+          .read(authRepositoryProvider)
+          .restoreSession()
+          .timeout(const Duration(seconds: 5));
+
+      if (kDebugMode) {
+        debugPrint('[AuthController] restoreSession() done; hasSession=${session != null}');
+      }
 
       if (session == null) {
         state = AuthState.unauthenticated.copyWith(isHydrating: false);
@@ -35,11 +86,25 @@ class AuthController extends Notifier<AuthState> {
         isHydrating: false,
         errorMessage: null,
       );
-    } catch (_) {
+    } on TimeoutException {
+      if (kDebugMode) {
+        debugPrint('[AuthController] restoreSession() timeout');
+      }
+      state = AuthState.unauthenticated.copyWith(
+        isHydrating: false,
+        errorMessage: '启动超时，请检查网络或重试',
+      );
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('[AuthController] restoreSession() failed: $error');
+        debugPrint(stackTrace.toString());
+      }
       state = AuthState.unauthenticated.copyWith(
         isHydrating: false,
         errorMessage: '会话恢复失败，请重新登录',
       );
+    } finally {
+      watchdog.cancel();
     }
   }
 

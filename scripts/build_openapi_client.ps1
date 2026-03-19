@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$clientRoot = Join-Path $projectRoot "lib/generated/openapi"
+$clientRoot = Join-Path $projectRoot "generated/openapi"
 
 if (-not (Test-Path (Join-Path $clientRoot "pubspec.yaml"))) {
   Write-Host "Generated OpenAPI client not found. Run scripts/generate_openapi.ps1 first."
