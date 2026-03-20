@@ -1,3 +1,4 @@
+import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -104,11 +105,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.videoDetail,
-        builder: (context, state) => const VideoDetailPage(),
+        builder: (context, state) => VideoDetailPage(
+          video: state.extra is Video ? state.extra as Video : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.videoPlayer,
-        builder: (context, state) => const VideoPlayerPage(),
+        builder: (context, state) => VideoPlayerPage(
+          video: state.extra is Video ? state.extra as Video : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.lives,

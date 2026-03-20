@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/playful_background.dart';
 import '../video_controller.dart';
 
-class VideoListPage extends ConsumerWidget {
+class VideoListPage extends ConsumerStatefulWidget {
   const VideoListPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VideoListPage> createState() => _VideoListPageState();
+}
+
+class _VideoListPageState extends ConsumerState<VideoListPage> {
+  int _selectedCategoryIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final categories = ['推荐', '专注力', '情绪管理', '运动游戏', '亲子互动'];
     final videos = ref.watch(videoListControllerProvider);
@@ -37,10 +46,14 @@ class VideoListPage extends ConsumerWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
-                  final isSelected = index == 0;
+                  final isSelected = index == _selectedCategoryIndex;
                   return ChoiceChip(
                     selected: isSelected,
-                    onSelected: (_) {},
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategoryIndex = index;
+                      });
+                    },
                     label: Text(categories[index]),
                   );
                 },
@@ -73,6 +86,10 @@ class VideoListPage extends ConsumerWidget {
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Card(
                             child: ListTile(
+                              onTap: () => context.push(
+                                AppRoutes.videoDetail,
+                                extra: video,
+                              ),
                               leading: Container(
                                 width: 54,
                                 height: 54,
@@ -87,7 +104,10 @@ class VideoListPage extends ConsumerWidget {
                                 (video.subjectTag ?? video.gradeRange ?? '').toString(),
                               ),
                               trailing: FilledButton(
-                                onPressed: () {},
+                                onPressed: () => context.push(
+                                  AppRoutes.videoPlayer,
+                                  extra: video,
+                                ),
                                 style: FilledButton.styleFrom(
                                   minimumSize: const Size(74, 40),
                                   backgroundColor: AppTheme.coral,
