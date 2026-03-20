@@ -92,9 +92,18 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
       return raw.map((key, value) => MapEntry(key.toString(), value));
     }
     if (raw is String) {
-      final decoded = jsonDecode(raw);
-      if (decoded is Map) {
-        return decoded.map((key, value) => MapEntry(key.toString(), value));
+      try {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map) {
+          return decoded.map((key, value) => MapEntry(key.toString(), value));
+        }
+      } catch (_) {
+        final trimmed = raw.trim();
+        final preview = trimmed.length > 200 ? '${trimmed.substring(0, 200)}...' : trimmed;
+        throw AppException(
+          type: AppExceptionType.server,
+          message: '服务响应不是有效 JSON：$preview',
+        );
       }
     }
     throw const AppException(
