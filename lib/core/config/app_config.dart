@@ -26,7 +26,7 @@ class AppConfig {
     );
     const agoraAppId = String.fromEnvironment('AGORA_APP_ID', defaultValue: '');
     const enableLog = bool.fromEnvironment('ENABLE_NETWORK_LOG', defaultValue: true);
-    const enableMockAuth = bool.fromEnvironment('ENABLE_MOCK_AUTH', defaultValue: true);
+    const enableMockAuth = bool.fromEnvironment('ENABLE_MOCK_AUTH', defaultValue: false);
 
     final flavor = env.toLowerCase() == 'prod' ? AppFlavor.prod : AppFlavor.dev;
 

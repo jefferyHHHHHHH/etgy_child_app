@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:etgy_openapi_client/etgy_openapi_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/device/device_id_service.dart';
@@ -17,9 +18,20 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((Ref ref) {
   final deviceIdService = ref.watch(deviceIdServiceProvider);
 
   if (config.enableMockAuth) {
+    if (kDebugMode) {
+      debugPrint(
+        '[AuthRemoteDataSource] Using MOCK auth (ENABLE_MOCK_AUTH=true). '
+        'apiBaseUrl=${config.apiBaseUrl}',
+      );
+    }
     return MockAuthRemoteDataSource();
   }
 
+  if (kDebugMode) {
+    debugPrint(
+      '[AuthRemoteDataSource] Using REAL auth. apiBaseUrl=${config.apiBaseUrl}',
+    );
+  }
   return OpenApiAuthRemoteDataSource(openapiClient, deviceIdService);
 });
 
