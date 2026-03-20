@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/playful_background.dart';
+import '../video_controller.dart';
 
-class VideoListPage extends StatelessWidget {
+class VideoListPage extends ConsumerWidget {
   const VideoListPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final categories = ['推荐', '专注力', '情绪管理', '运动游戏', '亲子互动'];
-    final cards = [
-      _VideoCardData('快乐专注训练营', '12 分钟', AppTheme.skyBlue, Icons.psychology_alt_rounded),
-      _VideoCardData('情绪小火车', '8 分钟', AppTheme.coral, Icons.sentiment_satisfied_alt_rounded),
-      _VideoCardData('家庭互动挑战', '15 分钟', AppTheme.mint, Icons.diversity_3_rounded),
-    ];
+    final videos = ref.watch(videoListControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('学习视频')),
+      appBar: AppBar(
+        title: const Text('学习视频'),
+        actions: [
+          IconButton(
+            onPressed: () => ref.read(videoListControllerProvider.notifier).refresh(),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: PlayfulBackground(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -43,66 +49,62 @@ class VideoListPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            ...cards.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 76,
-                          height: 76,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            color: item.color.withValues(alpha: 0.22),
-                          ),
-                          child: Icon(item.icon, color: item.color, size: 34),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item.title, style: theme.textTheme.titleMedium),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(Icons.schedule_rounded, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(item.duration, style: theme.textTheme.bodyMedium),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        FilledButton(
-                          onPressed: () {},
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(74, 40),
-                            backgroundColor: AppTheme.coral,
-                          ),
-                          child: const Text('播放'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            videos.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.only(top: 24),
+                child: Center(child: CircularProgressIndicator()),
               ),
+              error: (error, _) => Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: Center(child: Text(error.toString())),
+              ),
+              data: (items) {
+                if (items.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: Center(child: Text('暂无视频')),
+                  );
+                }
+
+                return Column(
+                  children: items
+                      .map(
+                        (video) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Card(
+                            child: ListTile(
+                              leading: Container(
+                                width: 54,
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.skyBlue.withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const Icon(Icons.smart_display_rounded, color: AppTheme.skyBlue),
+                              ),
+                              title: Text(video.title),
+                              subtitle: Text(
+                                (video.subjectTag ?? video.gradeRange ?? '').toString(),
+                              ),
+                              trailing: FilledButton(
+                                onPressed: () {},
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(74, 40),
+                                  backgroundColor: AppTheme.coral,
+                                ),
+                                child: const Text('播放'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class _VideoCardData {
-  const _VideoCardData(this.title, this.duration, this.color, this.icon);
-
-  final String title;
-  final String duration;
-  final Color color;
-  final IconData icon;
 }

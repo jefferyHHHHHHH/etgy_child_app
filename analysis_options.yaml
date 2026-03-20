@@ -12,6 +12,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - generated/openapi/**
+    - lib/generated/openapi/**
   language:
     strict-casts: true
     strict-inference: true
