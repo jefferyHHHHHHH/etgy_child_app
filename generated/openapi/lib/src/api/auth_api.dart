@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:etgy_openapi_client/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:etgy_openapi_client/src/model/api_auth_device_bind_confirm_post200_response.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_device_bind_confirm_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_login_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_register_post201_response.dart';
@@ -24,6 +26,96 @@ class AuthApi {
   final Dio _dio;
 
   const AuthApi(this._dio);
+
+  /// 确认设备绑定（儿童端）
+  /// 当 /api/auth/login 返回 bindRequired&#x3D;true 时，用 bindToken 完成设备绑定，并返回 JWT。  规则（MVP）：仅对 CHILD（儿童）账号生效；已绑定则会校验 deviceId 一致性。
+  ///
+  /// Parameters:
+  /// * [apiAuthDeviceBindConfirmPostRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ApiAuthDeviceBindConfirmPost200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ApiAuthDeviceBindConfirmPost200Response>> apiAuthDeviceBindConfirmPost({ 
+    ApiAuthDeviceBindConfirmPostRequest? apiAuthDeviceBindConfirmPostRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/auth/device/bind/confirm';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+_bodyData=jsonEncode(apiAuthDeviceBindConfirmPostRequest);
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ApiAuthDeviceBindConfirmPost200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ApiAuthDeviceBindConfirmPost200Response, ApiAuthDeviceBindConfirmPost200Response>(rawData, 'ApiAuthDeviceBindConfirmPost200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ApiAuthDeviceBindConfirmPost200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
 
   /// 登录
   /// 
@@ -293,9 +385,9 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthLoginPost200Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiAuthDeviceBindConfirmPost200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthLoginPost200Response>> apiAuthWechatMiniProgramBindPost({ 
+  Future<Response<ApiAuthDeviceBindConfirmPost200Response>> apiAuthWechatMiniProgramBindPost({ 
     ApiAuthWechatMiniProgramBindPostRequest? apiAuthWechatMiniProgramBindPostRequest,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -343,11 +435,11 @@ _bodyData=jsonEncode(apiAuthWechatMiniProgramBindPostRequest);
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthLoginPost200Response? _responseData;
+    ApiAuthDeviceBindConfirmPost200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthLoginPost200Response, ApiAuthLoginPost200Response>(rawData, 'ApiAuthLoginPost200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiAuthDeviceBindConfirmPost200Response, ApiAuthDeviceBindConfirmPost200Response>(rawData, 'ApiAuthDeviceBindConfirmPost200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -359,7 +451,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthLoginPost200Response
       );
     }
 
-    return Response<ApiAuthLoginPost200Response>(
+    return Response<ApiAuthDeviceBindConfirmPost200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

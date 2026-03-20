@@ -74,11 +74,14 @@ Class | Method | HTTP request | Description
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorChatPost**](doc/AIApi.md#apiaitutorchatpost) | **POST** /api/ai/tutor/chat | 儿童 AI 辅导对话
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorConversationsGet**](doc/AIApi.md#apiaitutorconversationsget) | **GET** /api/ai/tutor/conversations | 获取 AI 辅导会话列表（儿童）
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorConversationsIdGet**](doc/AIApi.md#apiaitutorconversationsidget) | **GET** /api/ai/tutor/conversations/{id} | 获取 AI 辅导会话详情（儿童）
+[*AuthApi*](doc/AuthApi.md) | [**apiAuthDeviceBindConfirmPost**](doc/AuthApi.md#apiauthdevicebindconfirmpost) | **POST** /api/auth/device/bind/confirm | 确认设备绑定（儿童端）
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthLoginPost**](doc/AuthApi.md#apiauthloginpost) | **POST** /api/auth/login | 登录
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthLogoutPost**](doc/AuthApi.md#apiauthlogoutpost) | **POST** /api/auth/logout | 退出登录
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthRegisterPost**](doc/AuthApi.md#apiauthregisterpost) | **POST** /api/auth/register | 注册（开发辅助）
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthWechatMiniProgramBindPost**](doc/AuthApi.md#apiauthwechatminiprogrambindpost) | **POST** /api/auth/wechat/mini-program/bind | 微信小程序绑定（用 bindToken + 账号密码绑定到儿童账号）
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthWechatMiniProgramLoginPost**](doc/AuthApi.md#apiauthwechatminiprogramloginpost) | **POST** /api/auth/wechat/mini-program/login | 微信小程序登录（code 换 openid；已绑定则直接返回 JWT）
+[*ChildrenApi*](doc/ChildrenApi.md) | [**apiChildrenIdPasswordGet**](doc/ChildrenApi.md#apichildrenidpasswordget) | **GET** /api/children/{id}/password | 查看儿童账号密码（平台管理员）
+[*ChildrenApi*](doc/ChildrenApi.md) | [**apiChildrenIdPasswordPost**](doc/ChildrenApi.md#apichildrenidpasswordpost) | **POST** /api/children/{id}/password | 修改儿童账号密码（平台管理员）
 [*LiveApi*](doc/LiveApi.md) | [**apiLiveAdminGet**](doc/LiveApi.md#apiliveadminget) | **GET** /api/live/admin | 管理端直播列表（学院/平台管理员）
 [*LiveApi*](doc/LiveApi.md) | [**apiLiveGet**](doc/LiveApi.md#apiliveget) | **GET** /api/live | 直播列表（公开）
 [*LiveApi*](doc/LiveApi.md) | [**apiLiveIdAgoraRtcTokenPost**](doc/LiveApi.md#apiliveidagorartctokenpost) | **POST** /api/live/{id}/agora/rtc-token | 获取 Agora RTC Token（登录用户）
@@ -101,6 +104,8 @@ Class | Method | HTTP request | Description
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformAuditLogsGet**](doc/PlatformApi.md#apiplatformauditlogsget) | **GET** /api/platform/audit-logs | 审计日志查询（管理员）
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsGet**](doc/PlatformApi.md#apiplatformcollegeadminsget) | **GET** /api/platform/college-admins | 学院管理员账号列表（平台管理员）
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsIdDelete**](doc/PlatformApi.md#apiplatformcollegeadminsiddelete) | **DELETE** /api/platform/college-admins/{id} | 删除学院管理员账号（平台管理员）
+[*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsIdPasswordGet**](doc/PlatformApi.md#apiplatformcollegeadminsidpasswordget) | **GET** /api/platform/college-admins/{id}/password | 查看学院管理员账号密码（平台管理员）
+[*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsIdPasswordPost**](doc/PlatformApi.md#apiplatformcollegeadminsidpasswordpost) | **POST** /api/platform/college-admins/{id}/password | 修改学院管理员账号密码（平台管理员）
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsIdPatch**](doc/PlatformApi.md#apiplatformcollegeadminsidpatch) | **PATCH** /api/platform/college-admins/{id} | 编辑学院管理员账号（平台管理员）
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsIdStatusPatch**](doc/PlatformApi.md#apiplatformcollegeadminsidstatuspatch) | **PATCH** /api/platform/college-admins/{id}/status | 停用/启用学院管理员账号（平台管理员）
 [*PlatformApi*](doc/PlatformApi.md) | [**apiPlatformCollegeAdminsPost**](doc/PlatformApi.md#apiplatformcollegeadminspost) | **POST** /api/platform/college-admins | 创建学院管理员账号（平台管理员）
@@ -121,6 +126,7 @@ Class | Method | HTTP request | Description
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenBatchExcelTemplateGet**](doc/UsersApi.md#apiuserschildrenbatchexceltemplateget) | **GET** /api/users/children/batch-excel/template | 下载儿童批量导入 Excel 模板（.xlsx）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenBatchPost**](doc/UsersApi.md#apiuserschildrenbatchpost) | **POST** /api/users/children/batch | 批量创建儿童账号（平台管理员建档）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenGet**](doc/UsersApi.md#apiuserschildrenget) | **GET** /api/users/children | 获取儿童账号列表（平台管理员）
+[*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenIdResetDeviceBindingPost**](doc/UsersApi.md#apiuserschildrenidresetdevicebindingpost) | **POST** /api/users/children/{id}/reset-device-binding | 重置儿童设备绑定（平台管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenIdResetPasswordPost**](doc/UsersApi.md#apiuserschildrenidresetpasswordpost) | **POST** /api/users/children/{id}/reset-password | 重置儿童账号密码（平台管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenIdStatusPatch**](doc/UsersApi.md#apiuserschildrenidstatuspatch) | **PATCH** /api/users/children/{id}/status | 更新儿童账号状态（平台管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersChildrenPost**](doc/UsersApi.md#apiuserschildrenpost) | **POST** /api/users/children | 创建儿童账号（平台管理员建档）
@@ -130,6 +136,8 @@ Class | Method | HTTP request | Description
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersBatchExcelPost**](doc/UsersApi.md#apiusersvolunteersbatchexcelpost) | **POST** /api/users/volunteers/batch-excel | 批量导入志愿者账号（Excel .xlsx，学院管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersBatchExcelTemplateGet**](doc/UsersApi.md#apiusersvolunteersbatchexceltemplateget) | **GET** /api/users/volunteers/batch-excel/template | 下载志愿者批量导入 Excel 模板（.xlsx）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersGet**](doc/UsersApi.md#apiusersvolunteersget) | **GET** /api/users/volunteers | 获取志愿者列表（管理员）
+[*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersIdPasswordGet**](doc/UsersApi.md#apiusersvolunteersidpasswordget) | **GET** /api/users/volunteers/{id}/password | 查看志愿者账号密码（管理员）
+[*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersIdPasswordPost**](doc/UsersApi.md#apiusersvolunteersidpasswordpost) | **POST** /api/users/volunteers/{id}/password | 修改志愿者账号密码（管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersIdStatusPatch**](doc/UsersApi.md#apiusersvolunteersidstatuspatch) | **PATCH** /api/users/volunteers/{id}/status | 更新志愿者状态（管理员）
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersIdSuspendPatch**](doc/UsersApi.md#apiusersvolunteersidsuspendpatch) | **PATCH** /api/users/volunteers/{id}/suspend | 停用/启用志愿者账号（管理员）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosAdminGet**](doc/VideosApi.md#apivideosadminget) | **GET** /api/videos/admin | 管理端视频列表（学院/平台管理员）
@@ -150,6 +158,9 @@ Class | Method | HTTP request | Description
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosIdSubmitPost**](doc/VideosApi.md#apivideosidsubmitpost) | **POST** /api/videos/{id}/submit | 提交视频审核（志愿者）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosIdWatchPost**](doc/VideosApi.md#apivideosidwatchpost) | **POST** /api/videos/{id}/watch | 上报学习/播放记录（登录用户）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosMineDashboardGet**](doc/VideosApi.md#apivideosminedashboardget) | **GET** /api/videos/mine/dashboard | 志愿者视频数据面板（我的）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosMineGet**](doc/VideosApi.md#apivideosmineget) | **GET** /api/videos/mine | 志愿者查看我的视频列表（可按状态筛选）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosMineIdGet**](doc/VideosApi.md#apivideosmineidget) | **GET** /api/videos/mine/{id} | 志愿者获取我的视频详情（含未发布）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosMineIdMediaUrlsGet**](doc/VideosApi.md#apivideosmineidmediaurlsget) | **GET** /api/videos/mine/{id}/media-urls | 志愿者获取我的视频/封面临时访问 URL（仅本人）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosPost**](doc/VideosApi.md#apivideospost) | **POST** /api/videos | 创建视频草稿（志愿者）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosWatchLogsGet**](doc/VideosApi.md#apivideoswatchlogsget) | **GET** /api/videos/watch-logs | 获取我的学习/播放记录（登录用户）
 
@@ -176,9 +187,15 @@ Class | Method | HTTP request | Description
  - [ApiAiTutorConversationsIdGet200Response](doc/ApiAiTutorConversationsIdGet200Response.md)
  - [ApiAiTutorConversationsIdGet200ResponseAllOfData](doc/ApiAiTutorConversationsIdGet200ResponseAllOfData.md)
  - [ApiAiTutorConversationsIdGet200ResponseAllOfDataMessagesInner](doc/ApiAiTutorConversationsIdGet200ResponseAllOfDataMessagesInner.md)
+ - [ApiAuthDeviceBindConfirmPost200Response](doc/ApiAuthDeviceBindConfirmPost200Response.md)
+ - [ApiAuthDeviceBindConfirmPostRequest](doc/ApiAuthDeviceBindConfirmPostRequest.md)
+ - [ApiAuthDeviceBindConfirmPostRequestDeviceInfo](doc/ApiAuthDeviceBindConfirmPostRequestDeviceInfo.md)
  - [ApiAuthLoginPost200Response](doc/ApiAuthLoginPost200Response.md)
  - [ApiAuthLoginPost200ResponseAllOfData](doc/ApiAuthLoginPost200ResponseAllOfData.md)
+ - [ApiAuthLoginPost200ResponseAllOfDataAnyOf](doc/ApiAuthLoginPost200ResponseAllOfDataAnyOf.md)
+ - [ApiAuthLoginPost200ResponseAllOfDataAnyOf1](doc/ApiAuthLoginPost200ResponseAllOfDataAnyOf1.md)
  - [ApiAuthLoginPostRequest](doc/ApiAuthLoginPostRequest.md)
+ - [ApiAuthLoginPostRequestDeviceInfo](doc/ApiAuthLoginPostRequestDeviceInfo.md)
  - [ApiAuthRegisterPost201Response](doc/ApiAuthRegisterPost201Response.md)
  - [ApiAuthRegisterPostRequest](doc/ApiAuthRegisterPostRequest.md)
  - [ApiAuthWechatMiniProgramBindPostRequest](doc/ApiAuthWechatMiniProgramBindPostRequest.md)
@@ -187,12 +204,14 @@ Class | Method | HTTP request | Description
  - [ApiAuthWechatMiniProgramLoginPost200ResponseAllOfDataAnyOf](doc/ApiAuthWechatMiniProgramLoginPost200ResponseAllOfDataAnyOf.md)
  - [ApiAuthWechatMiniProgramLoginPost200ResponseAllOfDataAnyOf1](doc/ApiAuthWechatMiniProgramLoginPost200ResponseAllOfDataAnyOf1.md)
  - [ApiAuthWechatMiniProgramLoginPostRequest](doc/ApiAuthWechatMiniProgramLoginPostRequest.md)
+ - [ApiLiveGet200Response](doc/ApiLiveGet200Response.md)
  - [ApiLiveIdAgoraRtcTokenPost200Response](doc/ApiLiveIdAgoraRtcTokenPost200Response.md)
  - [ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData](doc/ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData.md)
  - [ApiLiveIdFinishPostRequest](doc/ApiLiveIdFinishPostRequest.md)
  - [ApiLiveIdMessagesGet200Response](doc/ApiLiveIdMessagesGet200Response.md)
  - [ApiLiveIdMessagesPost201Response](doc/ApiLiveIdMessagesPost201Response.md)
  - [ApiLiveIdMessagesPostRequest](doc/ApiLiveIdMessagesPostRequest.md)
+ - [ApiLiveIdStreamGet200Response](doc/ApiLiveIdStreamGet200Response.md)
  - [ApiLivePost201Response](doc/ApiLivePost201Response.md)
  - [ApiLivePostRequest](doc/ApiLivePostRequest.md)
  - [ApiMetaDictionariesGet200Response](doc/ApiMetaDictionariesGet200Response.md)
@@ -217,6 +236,7 @@ Class | Method | HTTP request | Description
  - [ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInner](doc/ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInner.md)
  - [ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf](doc/ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf.md)
  - [ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf1](doc/ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf1.md)
+ - [ApiUsersVolunteersIdPasswordPostRequest](doc/ApiUsersVolunteersIdPasswordPostRequest.md)
  - [ApiUsersVolunteersIdStatusPatchRequest](doc/ApiUsersVolunteersIdStatusPatchRequest.md)
  - [ApiUsersVolunteersIdSuspendPatchRequest](doc/ApiUsersVolunteersIdSuspendPatchRequest.md)
  - [ApiVideosAuditBatchPostRequest](doc/ApiVideosAuditBatchPostRequest.md)
@@ -239,6 +259,8 @@ Class | Method | HTTP request | Description
  - [ErrorResponse](doc/ErrorResponse.md)
  - [LiveMessage](doc/LiveMessage.md)
  - [LiveRoom](doc/LiveRoom.md)
+ - [LiveRoomPagedResult](doc/LiveRoomPagedResult.md)
+ - [LiveStreamInfo](doc/LiveStreamInfo.md)
  - [Video](doc/Video.md)
  - [VideoComment](doc/VideoComment.md)
  - [VideoMetrics](doc/VideoMetrics.md)

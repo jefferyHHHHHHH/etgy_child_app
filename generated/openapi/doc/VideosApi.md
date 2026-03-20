@@ -27,6 +27,9 @@ Method | HTTP request | Description
 [**apiVideosIdSubmitPost**](VideosApi.md#apivideosidsubmitpost) | **POST** /api/videos/{id}/submit | 提交视频审核（志愿者）
 [**apiVideosIdWatchPost**](VideosApi.md#apivideosidwatchpost) | **POST** /api/videos/{id}/watch | 上报学习/播放记录（登录用户）
 [**apiVideosMineDashboardGet**](VideosApi.md#apivideosminedashboardget) | **GET** /api/videos/mine/dashboard | 志愿者视频数据面板（我的）
+[**apiVideosMineGet**](VideosApi.md#apivideosmineget) | **GET** /api/videos/mine | 志愿者查看我的视频列表（可按状态筛选）
+[**apiVideosMineIdGet**](VideosApi.md#apivideosmineidget) | **GET** /api/videos/mine/{id} | 志愿者获取我的视频详情（含未发布）
+[**apiVideosMineIdMediaUrlsGet**](VideosApi.md#apivideosmineidmediaurlsget) | **GET** /api/videos/mine/{id}/media-urls | 志愿者获取我的视频/封面临时访问 URL（仅本人）
 [**apiVideosPost**](VideosApi.md#apivideospost) | **POST** /api/videos | 创建视频草稿（志愿者）
 [**apiVideosWatchLogsGet**](VideosApi.md#apivideoswatchlogsget) | **GET** /api/videos/watch-logs | 获取我的学习/播放记录（登录用户）
 
@@ -803,6 +806,145 @@ try {
 
 ### Parameters
 This endpoint does not need any parameter.
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosMineGet**
+> ApiVideosGet200Response apiVideosMineGet(status, search, grade, subject, sort, page, pageSize)
+
+志愿者查看我的视频列表（可按状态筛选）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final String status = status_example; // String | 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）
+final String search = search_example; // String | 按标题/简介模糊搜索（仅我的视频）
+final String grade = grade_example; // String | 
+final String subject = subject_example; // String | 
+final String sort = sort_example; // String | 
+final int page = 56; // int | 
+final int pageSize = 56; // int | 
+
+try {
+    final response = api.apiVideosMineGet(status, search, grade, subject, sort, page, pageSize);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosMineGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **status** | **String**| 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等） | [optional] 
+ **search** | **String**| 按标题/简介模糊搜索（仅我的视频） | [optional] 
+ **grade** | **String**|  | [optional] 
+ **subject** | **String**|  | [optional] 
+ **sort** | **String**|  | [optional] [default to 'latest']
+ **page** | **int**|  | [optional] [default to 1]
+ **pageSize** | **int**|  | [optional] [default to 20]
+
+### Return type
+
+[**ApiVideosGet200Response**](ApiVideosGet200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosMineIdGet**
+> ApiVideosPost201Response apiVideosMineIdGet(id)
+
+志愿者获取我的视频详情（含未发布）
+
+仅返回当前登录志愿者自己上传的视频；不会返回他人的视频（即使已发布）。
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.apiVideosMineIdGet(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosMineIdGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+[**ApiVideosPost201Response**](ApiVideosPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosMineIdMediaUrlsGet**
+> ApiAuthRegisterPost201Response apiVideosMineIdMediaUrlsGet(id)
+
+志愿者获取我的视频/封面临时访问 URL（仅本人）
+
+返回当前登录志愿者自己上传视频的 presigned GET URL（含封面）。不会返回他人的视频。
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.apiVideosMineIdMediaUrlsGet(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosMineIdMediaUrlsGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
 
 ### Return type
 

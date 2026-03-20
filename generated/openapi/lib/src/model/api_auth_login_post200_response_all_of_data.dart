@@ -3,6 +3,8 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response_all_of_data_any_of1.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response_all_of_data_any_of.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -23,6 +25,10 @@ class ApiAuthLoginPost200ResponseAllOfData {
     required  this.token,
 
      this.user,
+
+    required  this.bindRequired,
+
+    required  this.bindToken,
   });
 
   @JsonKey(
@@ -49,17 +55,45 @@ class ApiAuthLoginPost200ResponseAllOfData {
 
 
 
+  @JsonKey(
+    
+    name: r'bindRequired',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool bindRequired;
+
+
+
+  @JsonKey(
+    
+    name: r'bindToken',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String bindToken;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ApiAuthLoginPost200ResponseAllOfData &&
       other.token == token &&
-      other.user == user;
+      other.user == user &&
+      other.bindRequired == bindRequired &&
+      other.bindToken == bindToken;
 
     @override
     int get hashCode =>
         token.hashCode +
-        (user == null ? 0 : user.hashCode);
+        (user == null ? 0 : user.hashCode) +
+        bindRequired.hashCode +
+        bindToken.hashCode;
 
   factory ApiAuthLoginPost200ResponseAllOfData.fromJson(Map<String, dynamic> json) => _$ApiAuthLoginPost200ResponseAllOfDataFromJson(json);
 

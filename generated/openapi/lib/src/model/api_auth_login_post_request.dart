@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:etgy_openapi_client/src/model/api_auth_login_post_request_device_info.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -25,6 +26,10 @@ class ApiAuthLoginPostRequest {
     required  this.password,
 
      this.role,
+
+     this.deviceId,
+
+     this.deviceInfo,
   });
 
   @JsonKey(
@@ -64,19 +69,48 @@ class ApiAuthLoginPostRequest {
 
 
 
+      /// 设备唯一标识（儿童端设备绑定）
+  @JsonKey(
+    
+    name: r'deviceId',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? deviceId;
+
+
+
+  @JsonKey(
+    
+    name: r'deviceInfo',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final ApiAuthLoginPostRequestDeviceInfo? deviceInfo;
+
+
+
 
 
     @override
     bool operator ==(Object other) => identical(this, other) || other is ApiAuthLoginPostRequest &&
       other.username == username &&
       other.password == password &&
-      other.role == role;
+      other.role == role &&
+      other.deviceId == deviceId &&
+      other.deviceInfo == deviceInfo;
 
     @override
     int get hashCode =>
         username.hashCode +
         password.hashCode +
-        role.hashCode;
+        role.hashCode +
+        deviceId.hashCode +
+        deviceInfo.hashCode;
 
   factory ApiAuthLoginPostRequest.fromJson(Map<String, dynamic> json) => _$ApiAuthLoginPostRequestFromJson(json);
 

@@ -9,12 +9,13 @@ import 'dart:convert';
 import 'package:etgy_openapi_client/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
-import 'package:etgy_openapi_client/src/model/api_auth_register_post201_response.dart';
+import 'package:etgy_openapi_client/src/model/api_live_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_agora_rtc_token_post200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_finish_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_live_id_stream_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
@@ -44,9 +45,9 @@ class LiveApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiLiveGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthRegisterPost201Response>> apiLiveAdminGet({ 
+  Future<Response<ApiLiveGet200Response>> apiLiveAdminGet({ 
     String? status,
     int? collegeId,
     int? anchorId,
@@ -97,11 +98,11 @@ class LiveApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthRegisterPost201Response? _responseData;
+    ApiLiveGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiLiveGet200Response, ApiLiveGet200Response>(rawData, 'ApiLiveGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -113,7 +114,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       );
     }
 
-    return Response<ApiAuthRegisterPost201Response>(
+    return Response<ApiLiveGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -141,9 +142,9 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiLiveGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthRegisterPost201Response>> apiLiveGet({ 
+  Future<Response<ApiLiveGet200Response>> apiLiveGet({ 
     String? tab,
     int? collegeId,
     String? search,
@@ -186,11 +187,11 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthRegisterPost201Response? _responseData;
+    ApiLiveGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiLiveGet200Response, ApiLiveGet200Response>(rawData, 'ApiLiveGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -202,7 +203,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       );
     }
 
-    return Response<ApiAuthRegisterPost201Response>(
+    return Response<ApiLiveGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1012,9 +1013,9 @@ _responseData = rawData == null ? null : deserialize<ApiLivePost201Response, Api
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiLiveIdStreamGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthRegisterPost201Response>> apiLiveIdStreamGet({ 
+  Future<Response<ApiLiveIdStreamGet200Response>> apiLiveIdStreamGet({ 
     required String id,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1050,11 +1051,11 @@ _responseData = rawData == null ? null : deserialize<ApiLivePost201Response, Api
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthRegisterPost201Response? _responseData;
+    ApiLiveIdStreamGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiLiveIdStreamGet200Response, ApiLiveIdStreamGet200Response>(rawData, 'ApiLiveIdStreamGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -1066,7 +1067,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       );
     }
 
-    return Response<ApiAuthRegisterPost201Response>(
+    return Response<ApiLiveIdStreamGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1170,9 +1171,9 @@ _responseData = rawData == null ? null : deserialize<ApiLivePost201Response, Api
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiLiveGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthRegisterPost201Response>> apiLiveMineGet({ 
+  Future<Response<ApiLiveGet200Response>> apiLiveMineGet({ 
     String? status,
     int? page = 1,
     int? pageSize = 20,
@@ -1217,11 +1218,11 @@ _responseData = rawData == null ? null : deserialize<ApiLivePost201Response, Api
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthRegisterPost201Response? _responseData;
+    ApiLiveGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiLiveGet200Response, ApiLiveGet200Response>(rawData, 'ApiLiveGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -1233,7 +1234,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       );
     }
 
-    return Response<ApiAuthRegisterPost201Response>(
+    return Response<ApiLiveGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

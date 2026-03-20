@@ -12,6 +12,8 @@ Method | HTTP request | Description
 [**apiPlatformAuditLogsGet**](PlatformApi.md#apiplatformauditlogsget) | **GET** /api/platform/audit-logs | 审计日志查询（管理员）
 [**apiPlatformCollegeAdminsGet**](PlatformApi.md#apiplatformcollegeadminsget) | **GET** /api/platform/college-admins | 学院管理员账号列表（平台管理员）
 [**apiPlatformCollegeAdminsIdDelete**](PlatformApi.md#apiplatformcollegeadminsiddelete) | **DELETE** /api/platform/college-admins/{id} | 删除学院管理员账号（平台管理员）
+[**apiPlatformCollegeAdminsIdPasswordGet**](PlatformApi.md#apiplatformcollegeadminsidpasswordget) | **GET** /api/platform/college-admins/{id}/password | 查看学院管理员账号密码（平台管理员）
+[**apiPlatformCollegeAdminsIdPasswordPost**](PlatformApi.md#apiplatformcollegeadminsidpasswordpost) | **POST** /api/platform/college-admins/{id}/password | 修改学院管理员账号密码（平台管理员）
 [**apiPlatformCollegeAdminsIdPatch**](PlatformApi.md#apiplatformcollegeadminsidpatch) | **PATCH** /api/platform/college-admins/{id} | 编辑学院管理员账号（平台管理员）
 [**apiPlatformCollegeAdminsIdStatusPatch**](PlatformApi.md#apiplatformcollegeadminsidstatuspatch) | **PATCH** /api/platform/college-admins/{id}/status | 停用/启用学院管理员账号（平台管理员）
 [**apiPlatformCollegeAdminsPost**](PlatformApi.md#apiplatformcollegeadminspost) | **POST** /api/platform/college-admins | 创建学院管理员账号（平台管理员）
@@ -165,6 +167,90 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiPlatformCollegeAdminsIdPasswordGet**
+> ApiAuthRegisterPost201Response apiPlatformCollegeAdminsIdPasswordGet(id)
+
+查看学院管理员账号密码（平台管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getPlatformApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.apiPlatformCollegeAdminsIdPasswordGet(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->apiPlatformCollegeAdminsIdPasswordGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiPlatformCollegeAdminsIdPasswordPost**
+> ApiAuthRegisterPost201Response apiPlatformCollegeAdminsIdPasswordPost(id, apiUsersVolunteersIdPasswordPostRequest)
+
+修改学院管理员账号密码（平台管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getPlatformApi();
+final String id = id_example; // String | 
+final ApiUsersVolunteersIdPasswordPostRequest apiUsersVolunteersIdPasswordPostRequest = ; // ApiUsersVolunteersIdPasswordPostRequest | 
+
+try {
+    final response = api.apiPlatformCollegeAdminsIdPasswordPost(id, apiUsersVolunteersIdPasswordPostRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PlatformApi->apiPlatformCollegeAdminsIdPasswordPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+ **apiUsersVolunteersIdPasswordPostRequest** | [**ApiUsersVolunteersIdPasswordPostRequest**](ApiUsersVolunteersIdPasswordPostRequest.md)|  | [optional] 
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

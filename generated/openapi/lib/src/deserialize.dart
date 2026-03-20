@@ -18,9 +18,15 @@ import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_get200_
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_id_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_id_get200_response_all_of_data.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_id_get200_response_all_of_data_messages_inner.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_device_bind_confirm_post200_response.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_device_bind_confirm_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_device_bind_confirm_post_request_device_info.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response_all_of_data.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response_all_of_data_any_of.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_login_post200_response_all_of_data_any_of1.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_login_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_auth_login_post_request_device_info.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_register_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_register_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_wechat_mini_program_bind_post_request.dart';
@@ -29,12 +35,14 @@ import 'package:etgy_openapi_client/src/model/api_auth_wechat_mini_program_login
 import 'package:etgy_openapi_client/src/model/api_auth_wechat_mini_program_login_post200_response_all_of_data_any_of.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_wechat_mini_program_login_post200_response_all_of_data_any_of1.dart';
 import 'package:etgy_openapi_client/src/model/api_auth_wechat_mini_program_login_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_live_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_agora_rtc_token_post200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_agora_rtc_token_post200_response_all_of_data.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_finish_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_id_messages_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_live_id_stream_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_live_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_meta_dictionaries_get200_response.dart';
@@ -59,6 +67,7 @@ import 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_p
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_post201_response_all_of_data_results_inner.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_post201_response_all_of_data_results_inner_any_of.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_post201_response_all_of_data_results_inner_any_of1.dart';
+import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_password_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_status_patch_request.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_suspend_patch_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
@@ -81,6 +90,8 @@ import 'package:etgy_openapi_client/src/model/dictionary_item.dart';
 import 'package:etgy_openapi_client/src/model/error_response.dart';
 import 'package:etgy_openapi_client/src/model/live_message.dart';
 import 'package:etgy_openapi_client/src/model/live_room.dart';
+import 'package:etgy_openapi_client/src/model/live_room_paged_result.dart';
+import 'package:etgy_openapi_client/src/model/live_stream_info.dart';
 import 'package:etgy_openapi_client/src/model/video.dart';
 import 'package:etgy_openapi_client/src/model/video_comment.dart';
 import 'package:etgy_openapi_client/src/model/video_metrics.dart';
@@ -144,12 +155,24 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiAiTutorConversationsIdGet200ResponseAllOfData.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAiTutorConversationsIdGet200ResponseAllOfDataMessagesInner':
           return ApiAiTutorConversationsIdGet200ResponseAllOfDataMessagesInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthDeviceBindConfirmPost200Response':
+          return ApiAuthDeviceBindConfirmPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthDeviceBindConfirmPostRequest':
+          return ApiAuthDeviceBindConfirmPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthDeviceBindConfirmPostRequestDeviceInfo':
+          return ApiAuthDeviceBindConfirmPostRequestDeviceInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthLoginPost200Response':
           return ApiAuthLoginPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthLoginPost200ResponseAllOfData':
           return ApiAuthLoginPost200ResponseAllOfData.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthLoginPost200ResponseAllOfDataAnyOf':
+          return ApiAuthLoginPost200ResponseAllOfDataAnyOf.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthLoginPost200ResponseAllOfDataAnyOf1':
+          return ApiAuthLoginPost200ResponseAllOfDataAnyOf1.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthLoginPostRequest':
           return ApiAuthLoginPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiAuthLoginPostRequestDeviceInfo':
+          return ApiAuthLoginPostRequestDeviceInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthRegisterPost201Response':
           return ApiAuthRegisterPost201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthRegisterPostRequest':
@@ -166,6 +189,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiAuthWechatMiniProgramLoginPost200ResponseAllOfDataAnyOf1.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAuthWechatMiniProgramLoginPostRequest':
           return ApiAuthWechatMiniProgramLoginPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiLiveGet200Response':
+          return ApiLiveGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiLiveIdAgoraRtcTokenPost200Response':
           return ApiLiveIdAgoraRtcTokenPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData':
@@ -178,6 +203,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiLiveIdMessagesPost201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiLiveIdMessagesPostRequest':
           return ApiLiveIdMessagesPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiLiveIdStreamGet200Response':
+          return ApiLiveIdStreamGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiLivePost201Response':
           return ApiLivePost201Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiLivePostRequest':
@@ -226,6 +253,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf1':
           return ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf1.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiUsersVolunteersIdPasswordPostRequest':
+          return ApiUsersVolunteersIdPasswordPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiUsersVolunteersIdStatusPatchRequest':
           return ApiUsersVolunteersIdStatusPatchRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiUsersVolunteersIdSuspendPatchRequest':
@@ -270,6 +299,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LiveMessage.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LiveRoom':
           return LiveRoom.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LiveRoomPagedResult':
+          return LiveRoomPagedResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'LiveStreamInfo':
+          return LiveStreamInfo.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Video':
           return Video.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'VideoComment':

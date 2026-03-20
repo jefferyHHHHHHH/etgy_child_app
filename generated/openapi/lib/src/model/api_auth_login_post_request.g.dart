@@ -13,6 +13,12 @@ abstract class _$ApiAuthLoginPostRequestCWProxy {
 
   ApiAuthLoginPostRequest role(ApiAuthLoginPostRequestRoleEnum? role);
 
+  ApiAuthLoginPostRequest deviceId(String? deviceId);
+
+  ApiAuthLoginPostRequest deviceInfo(
+    ApiAuthLoginPostRequestDeviceInfo? deviceInfo,
+  );
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ApiAuthLoginPostRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -23,6 +29,8 @@ abstract class _$ApiAuthLoginPostRequestCWProxy {
     String username,
     String password,
     ApiAuthLoginPostRequestRoleEnum? role,
+    String? deviceId,
+    ApiAuthLoginPostRequestDeviceInfo? deviceInfo,
   });
 }
 
@@ -44,6 +52,15 @@ class _$ApiAuthLoginPostRequestCWProxyImpl
       this(role: role);
 
   @override
+  ApiAuthLoginPostRequest deviceId(String? deviceId) =>
+      this(deviceId: deviceId);
+
+  @override
+  ApiAuthLoginPostRequest deviceInfo(
+    ApiAuthLoginPostRequestDeviceInfo? deviceInfo,
+  ) => this(deviceInfo: deviceInfo);
+
+  @override
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `ApiAuthLoginPostRequest(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -54,6 +71,8 @@ class _$ApiAuthLoginPostRequestCWProxyImpl
     Object? username = const $CopyWithPlaceholder(),
     Object? password = const $CopyWithPlaceholder(),
     Object? role = const $CopyWithPlaceholder(),
+    Object? deviceId = const $CopyWithPlaceholder(),
+    Object? deviceInfo = const $CopyWithPlaceholder(),
   }) {
     return ApiAuthLoginPostRequest(
       username: username == const $CopyWithPlaceholder()
@@ -68,6 +87,14 @@ class _$ApiAuthLoginPostRequestCWProxyImpl
           ? _value.role
           // ignore: cast_nullable_to_non_nullable
           : role as ApiAuthLoginPostRequestRoleEnum?,
+      deviceId: deviceId == const $CopyWithPlaceholder()
+          ? _value.deviceId
+          // ignore: cast_nullable_to_non_nullable
+          : deviceId as String?,
+      deviceInfo: deviceInfo == const $CopyWithPlaceholder()
+          ? _value.deviceInfo
+          // ignore: cast_nullable_to_non_nullable
+          : deviceInfo as ApiAuthLoginPostRequestDeviceInfo?,
     );
   }
 }
@@ -94,6 +121,15 @@ ApiAuthLoginPostRequest _$ApiAuthLoginPostRequestFromJson(
       'role',
       (v) => $enumDecodeNullable(_$ApiAuthLoginPostRequestRoleEnumEnumMap, v),
     ),
+    deviceId: $checkedConvert('deviceId', (v) => v as String?),
+    deviceInfo: $checkedConvert(
+      'deviceInfo',
+      (v) => v == null
+          ? null
+          : ApiAuthLoginPostRequestDeviceInfo.fromJson(
+              v as Map<String, dynamic>,
+            ),
+    ),
   );
   return val;
 });
@@ -104,6 +140,8 @@ Map<String, dynamic> _$ApiAuthLoginPostRequestToJson(
   'username': instance.username,
   'password': instance.password,
   'role': ?_$ApiAuthLoginPostRequestRoleEnumEnumMap[instance.role],
+  'deviceId': ?instance.deviceId,
+  'deviceInfo': ?instance.deviceInfo?.toJson(),
 };
 
 const _$ApiAuthLoginPostRequestRoleEnumEnumMap = {

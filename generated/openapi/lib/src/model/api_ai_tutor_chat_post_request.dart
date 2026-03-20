@@ -20,7 +20,7 @@ class ApiAiTutorChatPostRequest {
   /// Returns a new [ApiAiTutorChatPostRequest] instance.
   ApiAiTutorChatPostRequest({
 
-      this.mode = ApiAiTutorChatPostRequestModeEnum.study,
+    this.mode = ApiAiTutorChatPostRequestModeEnum.study,
 
     required  this.message,
 
@@ -28,7 +28,7 @@ class ApiAiTutorChatPostRequest {
   });
 
   @JsonKey(
-    defaultValue: 'study',
+    defaultValue: ApiAiTutorChatPostRequestModeEnum.study,
     name: r'mode',
     required: false,
     includeIfNull: false,

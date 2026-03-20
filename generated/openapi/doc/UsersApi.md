@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**apiUsersChildrenBatchExcelTemplateGet**](UsersApi.md#apiuserschildrenbatchexceltemplateget) | **GET** /api/users/children/batch-excel/template | 下载儿童批量导入 Excel 模板（.xlsx）
 [**apiUsersChildrenBatchPost**](UsersApi.md#apiuserschildrenbatchpost) | **POST** /api/users/children/batch | 批量创建儿童账号（平台管理员建档）
 [**apiUsersChildrenGet**](UsersApi.md#apiuserschildrenget) | **GET** /api/users/children | 获取儿童账号列表（平台管理员）
+[**apiUsersChildrenIdResetDeviceBindingPost**](UsersApi.md#apiuserschildrenidresetdevicebindingpost) | **POST** /api/users/children/{id}/reset-device-binding | 重置儿童设备绑定（平台管理员）
 [**apiUsersChildrenIdResetPasswordPost**](UsersApi.md#apiuserschildrenidresetpasswordpost) | **POST** /api/users/children/{id}/reset-password | 重置儿童账号密码（平台管理员）
 [**apiUsersChildrenIdStatusPatch**](UsersApi.md#apiuserschildrenidstatuspatch) | **PATCH** /api/users/children/{id}/status | 更新儿童账号状态（平台管理员）
 [**apiUsersChildrenPost**](UsersApi.md#apiuserschildrenpost) | **POST** /api/users/children | 创建儿童账号（平台管理员建档）
@@ -22,6 +23,8 @@ Method | HTTP request | Description
 [**apiUsersVolunteersBatchExcelPost**](UsersApi.md#apiusersvolunteersbatchexcelpost) | **POST** /api/users/volunteers/batch-excel | 批量导入志愿者账号（Excel .xlsx，学院管理员）
 [**apiUsersVolunteersBatchExcelTemplateGet**](UsersApi.md#apiusersvolunteersbatchexceltemplateget) | **GET** /api/users/volunteers/batch-excel/template | 下载志愿者批量导入 Excel 模板（.xlsx）
 [**apiUsersVolunteersGet**](UsersApi.md#apiusersvolunteersget) | **GET** /api/users/volunteers | 获取志愿者列表（管理员）
+[**apiUsersVolunteersIdPasswordGet**](UsersApi.md#apiusersvolunteersidpasswordget) | **GET** /api/users/volunteers/{id}/password | 查看志愿者账号密码（管理员）
+[**apiUsersVolunteersIdPasswordPost**](UsersApi.md#apiusersvolunteersidpasswordpost) | **POST** /api/users/volunteers/{id}/password | 修改志愿者账号密码（管理员）
 [**apiUsersVolunteersIdStatusPatch**](UsersApi.md#apiusersvolunteersidstatuspatch) | **PATCH** /api/users/volunteers/{id}/status | 更新志愿者状态（管理员）
 [**apiUsersVolunteersIdSuspendPatch**](UsersApi.md#apiusersvolunteersidsuspendpatch) | **PATCH** /api/users/volunteers/{id}/suspend | 停用/启用志愿者账号（管理员）
 
@@ -178,6 +181,47 @@ Name | Type | Description  | Notes
  **grade** | **String**|  | [optional] 
  **page** | **int**|  | [optional] [default to 1]
  **pageSize** | **int**|  | [optional] [default to 20]
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiUsersChildrenIdResetDeviceBindingPost**
+> ApiAuthRegisterPost201Response apiUsersChildrenIdResetDeviceBindingPost(id)
+
+重置儿童设备绑定（平台管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getUsersApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.apiUsersChildrenIdResetDeviceBindingPost(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling UsersApi->apiUsersChildrenIdResetDeviceBindingPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
 
 ### Return type
 
@@ -565,6 +609,90 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiUsersVolunteersIdPasswordGet**
+> ApiAuthRegisterPost201Response apiUsersVolunteersIdPasswordGet(id)
+
+查看志愿者账号密码（管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getUsersApi();
+final String id = id_example; // String | 
+
+try {
+    final response = api.apiUsersVolunteersIdPasswordGet(id);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling UsersApi->apiUsersVolunteersIdPasswordGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiUsersVolunteersIdPasswordPost**
+> ApiAuthRegisterPost201Response apiUsersVolunteersIdPasswordPost(id, apiUsersVolunteersIdPasswordPostRequest)
+
+修改志愿者账号密码（管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getUsersApi();
+final String id = id_example; // String | 
+final ApiUsersVolunteersIdPasswordPostRequest apiUsersVolunteersIdPasswordPostRequest = ; // ApiUsersVolunteersIdPasswordPostRequest | 
+
+try {
+    final response = api.apiUsersVolunteersIdPasswordPost(id, apiUsersVolunteersIdPasswordPostRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling UsersApi->apiUsersVolunteersIdPasswordPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**|  | 
+ **apiUsersVolunteersIdPasswordPostRequest** | [**ApiUsersVolunteersIdPasswordPostRequest**](ApiUsersVolunteersIdPasswordPostRequest.md)|  | [optional] 
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

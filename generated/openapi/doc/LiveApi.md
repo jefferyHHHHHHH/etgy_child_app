@@ -27,7 +27,7 @@ Method | HTTP request | Description
 
 
 # **apiLiveAdminGet**
-> ApiAuthRegisterPost201Response apiLiveAdminGet(status, collegeId, anchorId, search, page, pageSize)
+> ApiLiveGet200Response apiLiveAdminGet(status, collegeId, anchorId, search, page, pageSize)
 
 管理端直播列表（学院/平台管理员）
 
@@ -64,7 +64,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+[**ApiLiveGet200Response**](ApiLiveGet200Response.md)
 
 ### Authorization
 
@@ -78,7 +78,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiLiveGet**
-> ApiAuthRegisterPost201Response apiLiveGet(tab, collegeId, search, page, pageSize)
+> ApiLiveGet200Response apiLiveGet(tab, collegeId, search, page, pageSize)
 
 直播列表（公开）
 
@@ -113,7 +113,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+[**ApiLiveGet200Response**](ApiLiveGet200Response.md)
 
 ### Authorization
 
@@ -508,7 +508,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiLiveIdStreamGet**
-> ApiAuthRegisterPost201Response apiLiveIdStreamGet(id)
+> ApiLiveIdStreamGet200Response apiLiveIdStreamGet(id)
 
 获取直播推/拉流信息（登录用户）
 
@@ -535,7 +535,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+[**ApiLiveIdStreamGet200Response**](ApiLiveIdStreamGet200Response.md)
 
 ### Authorization
 
@@ -590,7 +590,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiLiveMineGet**
-> ApiAuthRegisterPost201Response apiLiveMineGet(status, page, pageSize)
+> ApiLiveGet200Response apiLiveMineGet(status, page, pageSize)
 
 我的直播列表（志愿者）
 
@@ -621,7 +621,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+[**ApiLiveGet200Response**](ApiLiveGet200Response.md)
 
 ### Authorization
 

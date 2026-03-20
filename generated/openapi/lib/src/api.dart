@@ -9,6 +9,7 @@ import 'package:etgy_openapi_client/src/auth/bearer_auth.dart';
 import 'package:etgy_openapi_client/src/auth/oauth.dart';
 import 'package:etgy_openapi_client/src/api/ai_api.dart';
 import 'package:etgy_openapi_client/src/api/auth_api.dart';
+import 'package:etgy_openapi_client/src/api/children_api.dart';
 import 'package:etgy_openapi_client/src/api/live_api.dart';
 import 'package:etgy_openapi_client/src/api/meta_api.dart';
 import 'package:etgy_openapi_client/src/api/oss_api.dart';
@@ -77,6 +78,12 @@ class EtgyOpenapiClient {
   /// by doing that all interceptors will not be executed
   AuthApi getAuthApi() {
     return AuthApi(dio);
+  }
+
+  /// Get ChildrenApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ChildrenApi getChildrenApi() {
+    return ChildrenApi(dio);
   }
 
   /// Get LiveApi instance, base route and serializer can be overridden by a given but be careful,
