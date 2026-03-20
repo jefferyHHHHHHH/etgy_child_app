@@ -20,6 +20,7 @@ class _FakeAuthController extends AuthController {
       token: null,
       user: null,
       isDeviceBound: false,
+      bindToken: null,
       isLoading: false,
       isHydrating: false,
       errorMessage: null,
@@ -41,7 +42,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('登录'), findsWidgets);
+    expect(find.text('开始学习'), findsOneWidget);
     expect(find.text('账号'), findsOneWidget);
     expect(find.text('密码'), findsOneWidget);
   });

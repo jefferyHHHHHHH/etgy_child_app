@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_exception.dart';
-import '../../../core/models/user_profile.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/auth_session.dart';
 import 'auth_remote_data_source.dart';
@@ -54,7 +53,9 @@ class AuthRepository {
         account: account,
         password: password,
       );
-      await persistSession(session);
+      if (session.token.isNotEmpty) {
+        await persistSession(session);
+      }
       await _resetFailedAttempts();
       return session;
     } catch (error) {
@@ -91,12 +92,15 @@ class AuthRepository {
   }
 
   Future<AuthSession> confirmDeviceBinding(AuthSession session) async {
-    final updated = AuthSession(
-      token: session.token,
-      status: AccountStatus.active,
-      user: session.user,
-      isDeviceBound: true,
-    );
+    final bindToken = session.bindToken;
+    if (bindToken == null || bindToken.isEmpty) {
+      throw const AppException(
+        type: AppExceptionType.validation,
+        message: '缺少设备绑定凭证，请重新登录',
+      );
+    }
+
+    final updated = await remoteDataSource.confirmDeviceBinding(bindToken: bindToken);
     await persistSession(updated);
     return updated;
   }

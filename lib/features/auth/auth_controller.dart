@@ -82,6 +82,7 @@ class AuthController extends Notifier<AuthState> {
         token: session.token,
         user: session.user,
         isDeviceBound: session.isDeviceBound,
+        bindToken: null,
         isLoading: false,
         isHydrating: false,
         errorMessage: null,
@@ -131,20 +132,21 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> confirmDeviceBinding() async {
-    final token = state.token;
+    final bindToken = state.bindToken;
     final user = state.user;
-    if (token == null || user == null) {
-      state = state.copyWith(errorMessage: '登录状态异常，请重新登录');
+    if (bindToken == null || bindToken.isEmpty || user == null) {
+      state = state.copyWith(errorMessage: '绑定凭证已失效，请重新登录');
       return;
     }
 
     try {
       final updated = await ref.read(authRepositoryProvider).confirmDeviceBinding(
             AuthSession(
-              token: token,
+              token: '',
               status: state.status,
               user: user,
               isDeviceBound: state.isDeviceBound,
+              bindToken: bindToken,
             ),
           );
       state = _fromSession(updated);
@@ -162,6 +164,7 @@ class AuthController extends Notifier<AuthState> {
       isLoading: false,
       isHydrating: false,
       clearToken: true,
+      clearBindToken: true,
       clearUser: true,
       clearError: true,
     );
@@ -172,11 +175,16 @@ class AuthController extends Notifier<AuthState> {
   }
 
   AuthState _fromSession(AuthSession session) {
+    final token = session.token.trim();
+    final normalizedToken = token.isEmpty ? null : token;
+    final bindToken = session.bindToken;
+
     return AuthState(
       status: session.status,
-      token: session.token,
+      token: normalizedToken,
       user: session.user,
       isDeviceBound: session.isDeviceBound,
+      bindToken: (bindToken == null || bindToken.isEmpty) ? null : bindToken,
       isLoading: false,
       isHydrating: false,
       errorMessage: null,

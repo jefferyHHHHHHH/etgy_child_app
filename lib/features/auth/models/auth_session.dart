@@ -6,6 +6,7 @@ class AuthSession {
     required this.status,
     required this.user,
     required this.isDeviceBound,
+    this.bindToken,
   });
 
   factory AuthSession.fromJson(Map<String, dynamic> json) {
@@ -13,6 +14,7 @@ class AuthSession {
       token: (json['token'] as String?) ?? '',
       status: _parseStatus((json['status'] as String?) ?? ''),
       isDeviceBound: (json['isDeviceBound'] as bool?) ?? false,
+      bindToken: (json['bindToken'] as String?),
       user: UserProfile.fromJson(
         (json['user'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       ),
@@ -23,12 +25,14 @@ class AuthSession {
   final AccountStatus status;
   final UserProfile user;
   final bool isDeviceBound;
+  final String? bindToken;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'token': token,
       'status': status.name,
       'isDeviceBound': isDeviceBound,
+      if (bindToken != null) 'bindToken': bindToken,
       'user': user.toJson(),
     };
   }
