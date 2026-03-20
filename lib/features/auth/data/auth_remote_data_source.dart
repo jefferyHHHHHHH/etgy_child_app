@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -82,6 +85,39 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
   final EtgyOpenapiClient _openapiClient;
   final DeviceIdService _deviceIdService;
 
+  bool _isSuccessCode(int code) => code == 0 || code == 200 || code == 201;
+
+  Map<String, dynamic> _asJsonMap(dynamic raw) {
+    if (raw is Map) {
+      return raw.map((key, value) => MapEntry(key.toString(), value));
+    }
+    if (raw is String) {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        return decoded.map((key, value) => MapEntry(key.toString(), value));
+      }
+    }
+    throw const AppException(
+      type: AppExceptionType.server,
+      message: '服务响应格式异常，请稍后重试',
+    );
+  }
+
+  AppException _toBackendException({
+    required int? code,
+    required String? message,
+  }) {
+    final normalizedMessage = (message == null || message.trim().isEmpty)
+        ? '请求失败，请稍后重试'
+        : message.trim();
+
+    // Without a published code table, keep classification conservative.
+    return AppException(
+      type: AppExceptionType.unknown,
+      message: normalizedMessage,
+    );
+  }
+
   @override
   Future<AuthSession> signIn({
     required String account,
@@ -89,25 +125,36 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
   }) async {
     final deviceId = await _deviceIdService.getOrCreate();
 
-    final response = await _openapiClient.getAuthApi().apiAuthLoginPost(
-      apiAuthLoginPostRequest: ApiAuthLoginPostRequest(
-        username: account,
-        password: password,
-        role: ApiAuthLoginPostRequestRoleEnum.CHILD,
-        deviceId: deviceId,
-      ),
+    final response = await _openapiClient.dio.post<dynamic>(
+      '/api/auth/login',
+      data: <String, dynamic>{
+        'username': account,
+        'password': password,
+        'role': 'CHILD',
+        'deviceId': deviceId,
+      },
+      options: Options(contentType: Headers.jsonContentType),
     );
 
-    final loginData = response.data?.data;
-    if (loginData == null) {
-      throw const AppException(
-        type: AppExceptionType.server,
-        message: '服务返回为空，请稍后重试',
-      );
+    final envelope = _asJsonMap(response.data);
+    final code = envelope['code'] as int?;
+    final message = envelope['message'] as String?;
+    if (code != null && !_isSuccessCode(code)) {
+      throw _toBackendException(code: code, message: message);
     }
 
-    if (loginData.bindRequired && loginData.bindToken.isNotEmpty) {
-      final userMap = _toUserMap(loginData.user);
+    final data = envelope['data'];
+    if (data is! Map) {
+      throw _toBackendException(code: code, message: message ?? '服务返回为空，请稍后重试');
+    }
+
+    final dataMap = data.map((key, value) => MapEntry(key.toString(), value));
+
+    final bindRequired = dataMap['bindRequired'] == true;
+    final bindToken = (dataMap['bindToken'] as String?) ?? '';
+
+    if (bindRequired && bindToken.isNotEmpty) {
+      final userMap = _toUserMap(dataMap['user']);
       final status = _parseStatus((userMap['status'] as String?) ?? 'pendingActivation');
       final user = UserProfile(
         name: _readName(userMap, fallback: account),
@@ -123,13 +170,12 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
         status: status,
         user: user,
         isDeviceBound: false,
-        bindToken: loginData.bindToken,
+        bindToken: bindToken,
       );
     }
 
-    final token = loginData.token;
-
-    final userMap = _toUserMap(loginData.user);
+    final token = (dataMap['token'] as String?) ?? '';
+    final userMap = _toUserMap(dataMap['user']);
     final status = _parseStatus((userMap['status'] as String?) ?? 'pendingActivation');
     final deviceBound =
         (userMap['isDeviceBound'] as bool?) ?? (userMap['deviceBound'] as bool?) ?? false;
@@ -144,10 +190,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
     );
 
     if (token.isEmpty) {
-      throw const AppException(
-        type: AppExceptionType.unauthorized,
-        message: '登录失败，请重试',
-      );
+      throw _toBackendException(code: code, message: message ?? '登录失败，请重试');
     }
 
     return AuthSession(
@@ -160,21 +203,34 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
 
   @override
   Future<AuthSession> confirmDeviceBinding({required String bindToken}) async {
-    final response = await _openapiClient.getAuthApi().apiAuthDeviceBindConfirmPost(
-          apiAuthDeviceBindConfirmPostRequest: ApiAuthDeviceBindConfirmPostRequest(
-            bindToken: bindToken,
-          ),
-        );
 
-    final data = response.data?.data;
-    if (data == null || data.token.isEmpty) {
-      throw const AppException(
-        type: AppExceptionType.unauthorized,
-        message: '设备绑定失败，请重新登录',
-      );
+    final response = await _openapiClient.dio.post<dynamic>(
+      '/api/auth/device/bind/confirm',
+      data: <String, dynamic>{
+        'bindToken': bindToken,
+      },
+      options: Options(contentType: Headers.jsonContentType),
+    );
+
+    final envelope = _asJsonMap(response.data);
+    final code = envelope['code'] as int?;
+    final message = envelope['message'] as String?;
+    if (code != null && !_isSuccessCode(code)) {
+      throw _toBackendException(code: code, message: message);
     }
 
-    final userMap = _toUserMap(data.user);
+    final data = envelope['data'];
+    if (data is! Map) {
+      throw _toBackendException(code: code, message: message ?? '设备绑定失败，请重新登录');
+    }
+
+    final dataMap = data.map((key, value) => MapEntry(key.toString(), value));
+    final token = (dataMap['token'] as String?) ?? '';
+    if (token.isEmpty) {
+      throw _toBackendException(code: code, message: message ?? '设备绑定失败，请重新登录');
+    }
+
+    final userMap = _toUserMap(dataMap['user']);
     final status = _parseStatus((userMap['status'] as String?) ?? 'active');
     final user = UserProfile(
       name: _readName(userMap, fallback: '用户'),
@@ -184,7 +240,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
     );
 
     return AuthSession(
-      token: data.token,
+      token: token,
       status: status,
       user: user,
       isDeviceBound: true,
