@@ -17,6 +17,7 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _accountController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   late final ProviderSubscription<AuthState> _authSubscription;
 
   @override
@@ -37,6 +38,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _authSubscription.close();
     _accountController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -133,6 +135,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 14),
                       TextField(
                         controller: _accountController,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                         decoration: const InputDecoration(
                           labelText: '账号',
                           prefixIcon: Icon(Icons.person_outline),
@@ -141,6 +146,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 12),
                       TextField(
                         controller: _passwordController,
+                        focusNode: _passwordFocusNode,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _onLogin(),
                         decoration: const InputDecoration(
                           labelText: '密码',
                           prefixIcon: Icon(Icons.lock_outline),
