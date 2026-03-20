@@ -113,6 +113,9 @@ class AuthController extends Notifier<AuthState> {
     required String account,
     required String password,
   }) async {
+    if (kDebugMode) {
+      debugPrint('[AuthController] signIn() begin; account=$account');
+    }
     state = state.copyWith(isLoading: true, clearError: true, isHydrating: false);
 
     try {
@@ -120,8 +123,17 @@ class AuthController extends Notifier<AuthState> {
           .read(authRepositoryProvider)
           .signIn(account: account, password: password);
 
+      if (kDebugMode) {
+        debugPrint(
+          '[AuthController] signIn() ok; tokenEmpty=${session.token.isEmpty} hasBindToken=${(session.bindToken ?? '').isNotEmpty}',
+        );
+      }
+
       state = _fromSession(session);
     } catch (error) {
+      if (kDebugMode) {
+        debugPrint('[AuthController] signIn() failed: $error');
+      }
       final appError = AppExceptionMapper.from(error);
       state = state.copyWith(
         isLoading: false,

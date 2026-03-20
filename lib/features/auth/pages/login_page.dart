@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,6 +42,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _onLogin() async {
     final authState = ref.read(authControllerProvider);
+    if (kDebugMode) {
+      debugPrint(
+        '[LoginPage] _onLogin tapped; isLoading=${authState.isLoading} isHydrating=${authState.isHydrating}',
+      );
+    }
     if (authState.isLoading) {
       return;
     }
@@ -53,6 +59,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         context,
       ).showSnackBar(const SnackBar(content: Text('请输入账号和密码')));
       return;
+    }
+
+    if (kDebugMode) {
+      debugPrint('[LoginPage] calling authController.signIn(account=$account)');
     }
 
     await ref
