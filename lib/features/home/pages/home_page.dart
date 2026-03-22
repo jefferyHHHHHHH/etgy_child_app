@@ -44,62 +44,11 @@ class HomePage extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('益路同行'),
-        actions: [
-          IconButton(
-            onPressed: () => context.push(AppRoutes.notifications),
-            icon: const Icon(Icons.notifications_none_rounded),
-          ),
-          IconButton(
-            onPressed: () =>
-                ref.read(videoListControllerProvider.notifier).refresh(),
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
-      ),
       body: PlayfulBackground(
         child: CustomScrollView(
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-              sliver: SliverToBoxAdapter(
-                child: _HeroCard(
-                  title: '今天也超棒',
-                  subtitle: '选择一个冒险，开始你的学习旅程吧！',
-                  onPrimaryTap: () => context.push(AppRoutes.videos),
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('快速入口', style: theme.textTheme.titleLarge),
-                    const SizedBox(height: 12),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: entries.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.06,
-                          ),
-                      itemBuilder: (context, index) {
-                        return _HomeEntryCard(item: entries[index]);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,6 +117,33 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
             ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('快速入口', style: theme.textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: entries.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 1.06,
+                          ),
+                      itemBuilder: (context, index) {
+                        return _HomeEntryCard(item: entries[index]);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -182,76 +158,6 @@ class _HomeEntry {
   final IconData icon;
   final Color color;
   final String route;
-}
-
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({
-    required this.title,
-    required this.subtitle,
-    required this.onPrimaryTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final VoidCallback onPrimaryTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Ink(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.skyBlue.withValues(alpha: 0.22),
-              AppTheme.mint.withValues(alpha: 0.18),
-              Colors.white,
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: theme.textTheme.headlineMedium),
-                    const SizedBox(height: 6),
-                    Text(subtitle, style: theme.textTheme.bodyMedium),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      onPressed: onPrimaryTap,
-                      child: const Text('开始学习'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: AppTheme.coral,
-                  size: 34,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _HomeEntryCard extends StatelessWidget {

@@ -211,84 +211,101 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     final controller = _controller;
     final video = widget.video;
     final title = video?.title ?? '视频播放';
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
+      resizeToAvoidBottomInset: true,
       body: PlayfulBackground(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          child: _errorMessage != null
-              ? Center(
+        child: _errorMessage != null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     '播放失败：${_errorMessage!}',
                     textAlign: TextAlign.center,
                   ),
-                )
-              : controller == null || _initializeFuture == null
-              ? const Center(child: CircularProgressIndicator())
-              : ListView(
-                  children: [
-                    _PlayerCard(
-                      controller: controller,
-                      initializeFuture: _initializeFuture!,
-                    ),
-                    const SizedBox(height: 12),
-                    _PlaybackControls(
-                      controller: controller,
-                      speed: _speed,
-                      onSpeedChanged: (value) async {
-                        setState(() => _speed = value);
-                        if (!controller.value.isInitialized) return;
-                        await controller.setPlaybackSpeed(value);
-                      },
-                    ),
-                    if (video != null) ...[
-                      const SizedBox(height: 12),
-                      _EngagementBar(video: video),
-                      const SizedBox(height: 12),
-                      _CommentComposer(
-                        controller: _commentController,
-                        onSend: () async {
-                          final text = _commentController.text.trim();
-                          if (text.isEmpty) return;
-
-                          try {
-                            await ref
-                                .read(
-                                  videoCommentsControllerProvider(
-                                    video.id,
-                                  ).notifier,
-                                )
-                                .post(text);
-                            _commentController.clear();
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('评论已提交（可能需要审核）')),
-                            );
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
+                ),
+              )
+            : controller == null || _initializeFuture == null
+                ? const Center(child: CircularProgressIndicator())
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                    children: [
+                      _PlayerCard(
+                        controller: controller,
+                        initializeFuture: _initializeFuture!,
+                        speed: _speed,
+                        onSpeedChanged: (value) async {
+                          setState(() => _speed = value);
+                          if (!controller.value.isInitialized) return;
+                          await controller.setPlaybackSpeed(value);
                         },
                       ),
-                      const SizedBox(height: 8),
-                      _CommentsSection(videoId: video.id),
+                      if (video != null) ...[
+                        const SizedBox(height: 10),
+                        _EngagementBar(video: video),
+                        const SizedBox(height: 12),
+                        _CommentsSection(videoId: video.id),
+                      ],
                     ],
-                  ],
-                ),
-        ),
+                  ),
       ),
+      bottomNavigationBar: video == null
+          ? null
+          : AnimatedPadding(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut,
+              padding: EdgeInsets.only(bottom: bottomInset),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: _CommentComposer(
+                    controller: _commentController,
+                    onSend: () async {
+                      final text = _commentController.text.trim();
+                      if (text.isEmpty) return;
+
+                      try {
+                        await ref
+                            .read(
+                              videoCommentsControllerProvider(video.id)
+                                  .notifier,
+                            )
+                            .post(text);
+                        _commentController.clear();
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('评论已提交（可能需要审核）')),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(e.toString())),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }
 
 class _PlayerCard extends StatelessWidget {
-  const _PlayerCard({required this.controller, required this.initializeFuture});
+  const _PlayerCard({
+    required this.controller,
+    required this.initializeFuture,
+    required this.speed,
+    required this.onSpeedChanged,
+  });
 
   final VideoPlayerController controller;
   final Future<void> initializeFuture;
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -318,77 +335,22 @@ class _PlayerCard extends StatelessWidget {
           final aspect = controller.value.aspectRatio == 0
               ? 16 / 9
               : controller.value.aspectRatio;
+
           return AspectRatio(
             aspectRatio: aspect,
-            child: VideoPlayer(controller),
-          );
-        },
-      ),
-    );
-  }
-}
+            child: ValueListenableBuilder<VideoPlayerValue>(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                final isReady = value.isInitialized;
+                final isPlaying = value.isPlaying;
+                final duration = value.duration;
+                final position = value.position;
 
-class _PlaybackControls extends StatelessWidget {
-  const _PlaybackControls({
-    required this.controller,
-    required this.speed,
-    required this.onSpeedChanged,
-  });
-
-  final VideoPlayerController controller;
-  final double speed;
-  final ValueChanged<double> onSpeedChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        child: ValueListenableBuilder<VideoPlayerValue>(
-          valueListenable: controller,
-          builder: (context, value, _) {
-            final duration = value.duration;
-            final position = value.position;
-            final isReady = value.isInitialized;
-            final isPlaying = value.isPlaying;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: VideoProgressIndicator(
-                    controller,
-                    allowScrubbing: true,
-                    colors: VideoProgressColors(
-                      playedColor: AppTheme.coral,
-                      bufferedColor: AppTheme.ink.withValues(alpha: 0.10),
-                      backgroundColor: AppTheme.ink.withValues(alpha: 0.06),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
+                return Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Text(
-                      _formatTime(position),
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const Spacer(),
-                    Text(
-                      _formatTime(duration),
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    IconButton(
-                      iconSize: 44,
-                      onPressed: !isReady
+                    GestureDetector(
+                      onTap: !isReady
                           ? null
                           : () {
                               if (isPlaying) {
@@ -397,54 +359,140 @@ class _PlaybackControls extends StatelessWidget {
                                 controller.play();
                               }
                             },
-                      icon: Icon(
-                        isPlaying
-                            ? Icons.pause_circle_filled
-                            : Icons.play_circle_filled,
-                      ),
+                      child: VideoPlayer(controller),
                     ),
-                    const Spacer(),
-                    PopupMenuButton<double>(
-                      initialValue: speed,
-                      onSelected: onSpeedChanged,
-                      itemBuilder: (context) => const [
-                        PopupMenuItem(value: 0.5, child: Text('0.5x')),
-                        PopupMenuItem(value: 0.75, child: Text('0.75x')),
-                        PopupMenuItem(value: 1.0, child: Text('1.0x')),
-                        PopupMenuItem(value: 1.25, child: Text('1.25x')),
-                        PopupMenuItem(value: 1.5, child: Text('1.5x')),
-                        PopupMenuItem(value: 2.0, child: Text('2.0x')),
-                      ],
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: AppTheme.ink.withValues(alpha: 0.10),
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withValues(alpha: 0.0),
+                                Colors.black.withValues(alpha: 0.0),
+                                Colors.black.withValues(alpha: 0.35),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.speed_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${speed.toStringAsFixed(speed == 1.0 ? 0 : 2)}x',
+                      ),
+                    ),
+                    Center(
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 140),
+                        opacity: isPlaying ? 0.0 : 1.0,
+                        child: Material(
+                          color: Colors.black.withValues(alpha: 0.28),
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: !isReady
+                                ? null
+                                : () {
+                                    if (isPlaying) {
+                                      controller.pause();
+                                    } else {
+                                      controller.play();
+                                    }
+                                  },
+                            child: const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.play_arrow_rounded,
+                                size: 44,
+                                color: Colors.white,
+                              ),
                             ),
-                          ],
+                          ),
                         ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: PopupMenuButton<double>(
+                        initialValue: speed,
+                        onSelected: onSpeedChanged,
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(value: 0.5, child: Text('0.5x')),
+                          PopupMenuItem(value: 0.75, child: Text('0.75x')),
+                          PopupMenuItem(value: 1.0, child: Text('1.0x')),
+                          PopupMenuItem(value: 1.25, child: Text('1.25x')),
+                          PopupMenuItem(value: 1.5, child: Text('1.5x')),
+                          PopupMenuItem(value: 2.0, child: Text('2.0x')),
+                        ],
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.28),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '${speed.toStringAsFixed(speed == 1.0 ? 0 : 2)}x',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 10,
+                      right: 10,
+                      bottom: 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: VideoProgressIndicator(
+                              controller,
+                              allowScrubbing: true,
+                              colors: VideoProgressColors(
+                                playedColor: AppTheme.coral,
+                                bufferedColor: Colors.white.withValues(
+                                  alpha: 0.30,
+                                ),
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.18,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Text(
+                                _formatTime(position),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                _formatTime(duration),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ],
-            );
-          },
-        ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
