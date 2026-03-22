@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:etgy_openapi_client/etgy_openapi_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
@@ -42,7 +44,8 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
       return;
     }
 
-    final uri = Uri.tryParse(url.trim());
+    final raw = url.trim();
+    final uri = Uri.tryParse(raw) ?? Uri.tryParse(Uri.encodeFull(raw));
     if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
       _errorMessage = '视频地址格式不正确：$url';
       return;
@@ -50,8 +53,14 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
 
     final token = ref.read(authControllerProvider).token?.trim();
     final headers = <String, String>{
+      // Some servers/CDNs reject ExoPlayer's default UA; a browser-like UA improves compatibility.
+      'User-Agent':
+          'Mozilla/5.0 (Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
+
+    // Best-effort: print response headers/status to diagnose ExoPlayer "Source error".
+    unawaited(_probeVideoUrl(uri, headers));
 
     final controller = VideoPlayerController.networkUrl(
       uri,
@@ -72,6 +81,41 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             _errorMessage = e.toString();
           });
         });
+  }
+
+  Future<void> _probeVideoUrl(Uri uri, Map<String, String> headers) async {
+    if (!kDebugMode) return;
+
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(uri);
+      request.followRedirects = true;
+      request.maxRedirects = 5;
+      headers.forEach(request.headers.set);
+      request.headers.set(HttpHeaders.rangeHeader, 'bytes=0-1');
+
+      final response = await request.close();
+      final contentType = response.headers.contentType?.mimeType;
+      final acceptRanges = response.headers.value('accept-ranges');
+      final contentRange = response.headers.value('content-range');
+      final server = response.headers.value('server');
+
+      debugPrint(
+        '[VideoProbe] uri=$uri status=${response.statusCode} '
+        'contentType=$contentType contentLength=${response.contentLength} '
+        'acceptRanges=$acceptRanges contentRange=$contentRange server=$server '
+        'redirects=${response.redirects.length}',
+      );
+      for (final r in response.redirects) {
+        debugPrint('[VideoProbe] redirect: ${r.statusCode} ${r.location}');
+      }
+
+      await response.drain<void>();
+    } catch (e) {
+      debugPrint('[VideoProbe] failed: $e');
+    } finally {
+      client.close(force: true);
+    }
   }
 
   void _startWatchReporting() {
