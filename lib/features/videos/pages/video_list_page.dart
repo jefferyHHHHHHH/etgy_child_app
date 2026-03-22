@@ -88,7 +88,7 @@ class _VideoListPageState extends ConsumerState<VideoListPage> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 0.74,
+                    childAspectRatio: 0.70,
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
@@ -155,7 +155,7 @@ class _VideoCard extends StatelessWidget {
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -166,16 +166,16 @@ class _VideoCard extends StatelessWidget {
                     style: theme.textTheme.titleMedium,
                   ),
                   if (intro != null && intro.isNotEmpty) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       intro,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium,
                     ),
                   ],
                   if (tags.isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
