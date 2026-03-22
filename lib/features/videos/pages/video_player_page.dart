@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter/foundation.dart';
@@ -52,11 +53,14 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     }
 
     final token = ref.read(authControllerProvider).token?.trim();
+    final isPresigned = _isPresignedS3Url(uri);
     final headers = <String, String>{
       // Some servers/CDNs reject ExoPlayer's default UA; a browser-like UA improves compatibility.
       'User-Agent':
           'Mozilla/5.0 (Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      // For S3-style presigned URLs, adding an Authorization header can cause 403 on some providers.
+      if (!isPresigned && token != null && token.isNotEmpty)
+        'Authorization': 'Bearer $token',
     };
 
     // Best-effort: print response headers/status to diagnose ExoPlayer "Source error".
@@ -110,12 +114,48 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         debugPrint('[VideoProbe] redirect: ${r.statusCode} ${r.location}');
       }
 
-      await response.drain<void>();
+      // Read a short snippet for error diagnosis (e.g. <Code>AccessDenied</Code>, <Code>ExpiredToken</Code>).
+      final snippet = await _readResponseSnippet(response, maxBytes: 512);
+      if (response.statusCode >= 400 && snippet.isNotEmpty) {
+        debugPrint('[VideoProbe] bodySnippet=${snippet.replaceAll('\n', ' ')}');
+      }
     } catch (e) {
       debugPrint('[VideoProbe] failed: $e');
     } finally {
       client.close(force: true);
     }
+  }
+
+  static bool _isPresignedS3Url(Uri uri) {
+    final qp = uri.queryParameters;
+    return qp.containsKey('X-Amz-Signature') ||
+        qp.containsKey('X-Amz-Credential') ||
+        qp.containsKey('X-Amz-Algorithm');
+  }
+
+  static Future<String> _readResponseSnippet(
+    HttpClientResponse response, {
+    required int maxBytes,
+  }) async {
+    final builder = BytesBuilder(copy: false);
+    var total = 0;
+
+    await for (final chunk in response) {
+      if (total >= maxBytes) {
+        continue;
+      }
+      final remaining = maxBytes - total;
+      if (chunk.length <= remaining) {
+        builder.add(chunk);
+        total += chunk.length;
+      } else {
+        builder.add(chunk.sublist(0, remaining));
+        total += remaining;
+      }
+    }
+
+    if (total == 0) return '';
+    return String.fromCharCodes(builder.takeBytes());
   }
 
   void _startWatchReporting() {
