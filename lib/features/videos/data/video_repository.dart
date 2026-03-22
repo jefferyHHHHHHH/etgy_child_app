@@ -29,4 +29,45 @@ class VideoRepository {
       search: search,
     );
   }
+
+  Future<List<VideoComment>> fetchComments({
+    required int videoId,
+    int page = 1,
+    int pageSize = 20,
+  }) {
+    return remote.fetchComments(
+      videoId: videoId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
+  Future<VideoComment> postComment({
+    required int videoId,
+    required String content,
+  }) {
+    return remote.postComment(videoId: videoId, content: content);
+  }
+
+  Future<void> toggleLike({required int videoId}) {
+    return remote.toggleLike(videoId: videoId);
+  }
+
+  Future<void> toggleFavorite({required int videoId}) {
+    return remote.toggleFavorite(videoId: videoId);
+  }
+
+  Future<void> reportWatch({
+    required int videoId,
+    required int lastPositionSec,
+    required int watchedSeconds,
+    required bool completed,
+  }) {
+    return remote.reportWatch(
+      videoId: videoId,
+      lastPositionSec: lastPositionSec,
+      watchedSeconds: watchedSeconds,
+      completed: completed,
+    );
+  }
 }
