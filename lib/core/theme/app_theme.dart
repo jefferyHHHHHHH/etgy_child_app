@@ -54,17 +54,25 @@ class AppTheme {
       ),
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: paper.withValues(alpha: 0.92),
         foregroundColor: ink,
         elevation: 0,
+        scrolledUnderElevation: 4,
+        shadowColor: ink.withValues(alpha: 0.12),
+        surfaceTintColor: Colors.transparent,
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge,
       ),
       cardTheme: CardThemeData(
         color: Colors.white,
         margin: EdgeInsets.zero,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 1.5,
+        shadowColor: ink.withValues(alpha: 0.10),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: ink.withValues(alpha: 0.06)),
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
