@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/playful_background.dart';
+import '../../auth/auth_controller.dart';
 import '../data/video_repository.dart';
 import '../video_comments_controller.dart';
 import '../video_engagement_controller.dart';
@@ -47,7 +48,15 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
       return;
     }
 
-    final controller = VideoPlayerController.networkUrl(uri);
+    final token = ref.read(authControllerProvider).token?.trim();
+    final headers = <String, String>{
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+
+    final controller = VideoPlayerController.networkUrl(
+      uri,
+      httpHeaders: headers,
+    );
     _controller = controller;
     _initializeFuture = controller
         .initialize()
