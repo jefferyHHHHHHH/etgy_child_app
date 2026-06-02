@@ -18,28 +18,32 @@ class HomePage extends ConsumerWidget {
 
     final entries = <_HomeEntry>[
       _HomeEntry(
-        '课程视频',
-        Icons.smart_display_rounded,
-        AppTheme.skyBlue,
-        AppRoutes.videos,
+        title: '课程视频',
+        icon: Icons.smart_display_rounded,
+        background: const Color(0xFFE8F4FF),
+        accent: const Color(0xFF4AA3FF),
+        route: AppRoutes.videos,
       ),
       _HomeEntry(
-        '直播课堂',
-        Icons.live_tv_rounded,
-        AppTheme.coral,
-        AppRoutes.lives,
+        title: '直播课堂',
+        icon: Icons.live_tv_rounded,
+        background: const Color(0xFFFFF0EC),
+        accent: const Color(0xFFFF7A59),
+        route: AppRoutes.lives,
       ),
       _HomeEntry(
-        'AI 学习搭子',
-        Icons.auto_awesome_rounded,
-        AppTheme.banana,
-        AppRoutes.aiTutor,
+        title: '学习搭子',
+        icon: Icons.auto_awesome_rounded,
+        background: const Color(0xFFFFF8E6),
+        accent: const Color(0xFFF4B400),
+        route: AppRoutes.aiTutor,
       ),
       _HomeEntry(
-        '成长档案',
-        Icons.favorite_rounded,
-        AppTheme.mint,
-        AppRoutes.profile,
+        title: '成长档案',
+        icon: Icons.favorite_rounded,
+        background: const Color(0xFFECFFF7),
+        accent: const Color(0xFF32C48D),
+        route: AppRoutes.profile,
       ),
     ];
 
@@ -134,7 +138,7 @@ class HomePage extends ConsumerWidget {
                             crossAxisCount: 2,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
-                            childAspectRatio: 1.06,
+                            mainAxisExtent: 100,
                           ),
                       itemBuilder: (context, index) {
                         return _HomeEntryCard(item: entries[index]);
@@ -152,11 +156,18 @@ class HomePage extends ConsumerWidget {
 }
 
 class _HomeEntry {
-  const _HomeEntry(this.title, this.icon, this.color, this.route);
+  const _HomeEntry({
+    required this.title,
+    required this.icon,
+    required this.background,
+    required this.accent,
+    required this.route,
+  });
 
   final String title;
   final IconData icon;
-  final Color color;
+  final Color background;
+  final Color accent;
   final String route;
 }
 
@@ -171,11 +182,13 @@ class _HomeEntryCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         onTap: () => context.push(item.route),
         child: Ink(
           decoration: BoxDecoration(
-            color: item.color.withValues(alpha: 0.08),
+            color: item.background,
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -186,10 +199,10 @@ class _HomeEntryCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: item.color.withValues(alpha: 0.22),
+                    color: item.accent.withValues(alpha: 0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(item.icon, size: 22, color: item.color),
+                  child: Icon(item.icon, size: 22, color: item.accent),
                 ),
                 const Spacer(),
                 Text(item.title, style: theme.textTheme.titleMedium),

@@ -28,7 +28,8 @@ class VideoEngagementArgs {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is VideoEngagementArgs && other.videoId == videoId;
+      identical(this, other) ||
+      other is VideoEngagementArgs && other.videoId == videoId;
 
   @override
   int get hashCode => videoId.hashCode;
@@ -94,27 +95,27 @@ class VideoEngagementState {
   }
 }
 
-final videoEngagementControllerProvider =
-    NotifierProvider.family<VideoEngagementController, VideoEngagementState, VideoEngagementArgs>(
-  VideoEngagementController.new,
-);
+final videoEngagementControllerProvider = NotifierProvider.family<
+    VideoEngagementController,
+    VideoEngagementState,
+    VideoEngagementArgs>(VideoEngagementController.new);
 
 class VideoEngagementController
     extends FamilyNotifier<VideoEngagementState, VideoEngagementArgs> {
   bool _refreshScheduled = false;
+  bool _metricsDirty = false;
+  bool _refreshPending = false;
 
   @override
   VideoEngagementState build(VideoEngagementArgs arg) {
-    final store = ref.watch(videoEngagementStoreProvider);
-
-    // Keep liked/favorited synced to the global store.
     ref.listen(videoEngagementStoreProvider, (previous, next) {
       if (previous == null) return;
+
       final liked = next.likedIds.contains(arg.videoId);
       final favorited = next.favoritedIds.contains(arg.videoId);
-      if (liked != state.liked || favorited != state.favorited) {
-        state = state.copyWith(liked: liked, favorited: favorited);
-      }
+      if (liked == state.liked && favorited == state.favorited) return;
+
+      state = state.copyWith(liked: liked, favorited: favorited);
     });
 
     if (!_refreshScheduled) {
@@ -122,11 +123,16 @@ class VideoEngagementController
       Future.microtask(refreshFromServer);
     }
 
+    final store = ref.read(videoEngagementStoreProvider);
     return VideoEngagementState.initial(args: arg, store: store);
   }
 
+  /// 从服务端拉取最新 metrics（进入详情页时调用一次）。
   Future<void> refreshFromServer() async {
-    if (state.isRefreshing) return;
+    if (state.isRefreshing) {
+      _refreshPending = true;
+      return;
+    }
 
     state = state.copyWith(isRefreshing: true);
 
@@ -135,7 +141,7 @@ class VideoEngagementController
           .read(videoRepositoryProvider)
           .fetchVideoById(videoId: arg.videoId);
       final metrics = video.metrics;
-      if (metrics != null) {
+      if (metrics != null && !_metricsDirty) {
         state = state.copyWith(
           playCount: metrics.playCount,
           likeCount: metrics.likeCount,
@@ -144,65 +150,100 @@ class VideoEngagementController
       }
     } finally {
       state = state.copyWith(isRefreshing: false);
+
+      if (_refreshPending) {
+        _refreshPending = false;
+        if (!_metricsDirty) {
+          await refreshFromServer();
+        }
+      }
+    }
+  }
+
+  /// 播放上报成功后，仅刷新播放量（不影响点赞/收藏计数）。
+  Future<void> refreshPlayCountFromServer() async {
+    try {
+      final video = await ref
+          .read(videoRepositoryProvider)
+          .fetchVideoById(videoId: arg.videoId);
+      final playCount = video.metrics?.playCount;
+      if (playCount == null) return;
+
+      state = state.copyWith(playCount: playCount);
+    } catch (_) {
+      // Best-effort.
     }
   }
 
   Future<void> toggleLike() async {
     if (state.isLiking) return;
 
-    final previous = state;
-
-    final nextLiked = !state.liked;
-    final nextCount = (state.likeCount + (nextLiked ? 1 : -1)).clamp(
-      0,
-      1 << 30,
-    );
-
-    state = state.copyWith(
-      liked: nextLiked,
-      likeCount: nextCount,
-      isLiking: true,
-    );
+    final wasLiked = state.liked;
+    state = state.copyWith(isLiking: true);
 
     try {
       await ref.read(videoRepositoryProvider).toggleLike(videoId: arg.videoId);
+
+      final nowLiked = !wasLiked;
       await ref
           .read(videoEngagementStoreProvider.notifier)
-          .setLiked(videoId: arg.videoId, liked: nextLiked);
-      await refreshFromServer();
+          .setLiked(videoId: arg.videoId, liked: nowLiked);
+
+      _metricsDirty = true;
+      state = state.copyWith(
+        liked: nowLiked,
+        likeCount: _adjustCount(
+          current: state.likeCount,
+          wasActive: wasLiked,
+          nowActive: nowLiked,
+        ),
+        isLiking: false,
+      );
     } catch (_) {
-      state = previous.copyWith(isLiking: false);
+      state = state.copyWith(isLiking: false);
       rethrow;
     }
-
-    state = state.copyWith(isLiking: false);
   }
 
   Future<void> toggleFavorite() async {
     if (state.isFavoriting) return;
 
-    final previous = state;
-
-    final nextFav = !state.favorited;
-    final nextCount = (state.favCount + (nextFav ? 1 : -1)).clamp(0, 1 << 30);
-
-    state = state.copyWith(
-      favorited: nextFav,
-      favCount: nextCount,
-      isFavoriting: true,
-    );
+    final wasFavorited = state.favorited;
+    state = state.copyWith(isFavoriting: true);
 
     try {
-      await ref.read(videoRepositoryProvider).toggleFavorite(videoId: arg.videoId);
+      await ref
+          .read(videoRepositoryProvider)
+          .toggleFavorite(videoId: arg.videoId);
+
+      final nowFavorited = !wasFavorited;
       await ref
           .read(videoEngagementStoreProvider.notifier)
-          .setFavorited(videoId: arg.videoId, favorited: nextFav);
-      await refreshFromServer();
+          .setFavorited(videoId: arg.videoId, favorited: nowFavorited);
+
+      _metricsDirty = true;
+      state = state.copyWith(
+        favorited: nowFavorited,
+        favCount: _adjustCount(
+          current: state.favCount,
+          wasActive: wasFavorited,
+          nowActive: nowFavorited,
+        ),
+        isFavoriting: false,
+      );
     } catch (_) {
-      state = previous.copyWith(isFavoriting: false);
+      state = state.copyWith(isFavoriting: false);
       rethrow;
     }
+  }
 
-    state = state.copyWith(isFavoriting: false);
+  static int _adjustCount({
+    required int current,
+    required bool wasActive,
+    required bool nowActive,
+  }) {
+    if (wasActive == nowActive) return current;
+    if (nowActive) return current + 1;
+    return (current - 1).clamp(0, 1 << 30);
   }
 }

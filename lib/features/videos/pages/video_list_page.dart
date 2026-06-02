@@ -36,73 +36,70 @@ class _VideoListPageState extends ConsumerState<VideoListPage> {
         ],
       ),
       body: PlayfulBackground(
-        child: ListView(
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            Text('今天看什么？', style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 6),
-            Text('精选内容帮你轻松成长，每天一点点进步。', style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 14),
-            SizedBox(
-              height: 40,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, index) {
-                  final isSelected = index == _selectedCategoryIndex;
-                  return ChoiceChip(
-                    selected: isSelected,
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedCategoryIndex = index;
-                      });
-                    },
-                    label: Text(categories[index]),
-                  );
-                },
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemCount: categories.length,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('今天看什么？', style: theme.textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text(
+                '精选内容帮你轻松成长，每天一点点进步。',
+                style: theme.textTheme.bodyMedium,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const SizedBox(height: 14),
-            videos.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (error, _) => Padding(
-                padding: const EdgeInsets.only(top: 24),
-                child: Center(child: Text(error.toString())),
-              ),
-              data: (items) {
-                if (items.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 24),
-                    child: Center(child: Text('暂无视频')),
-                  );
-                }
-
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.70,
-                  ),
-                  itemCount: items.length,
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    final video = items[index];
-                    return _VideoCard(
-                      video: video,
-                      onTap: () =>
-                          context.push(AppRoutes.videoPlayer, extra: video),
+                    final isSelected = index == _selectedCategoryIndex;
+                    return ChoiceChip(
+                      selected: isSelected,
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedCategoryIndex = index;
+                        });
+                      },
+                      label: Text(categories[index]),
                     );
                   },
-                );
-              },
-            ),
-          ],
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemCount: categories.length,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: videos.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text(error.toString())),
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return const Center(child: Text('暂无视频'));
+                    }
+
+                    return ListView.separated(
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final video = items[index];
+                        return _VideoCard(
+                          video: video,
+                          onTap: () => context.push(
+                            AppRoutes.videoPlayer,
+                            extra: video,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -122,12 +119,10 @@ class _VideoCard extends StatelessWidget {
     final durationText = _formatDuration(video.duration);
 
     final subjectTag = video.subjectTag?.trim();
-    final gradeRange = video.gradeRange?.trim();
     final intro = video.intro?.trim();
 
     final tags = <String>[
       if (subjectTag != null && subjectTag.isNotEmpty) subjectTag,
-      if (gradeRange != null && gradeRange.isNotEmpty) gradeRange,
       // ignore: use_null_aware_elements
       if (durationText != null) durationText,
     ];
@@ -136,62 +131,67 @@ class _VideoCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: coverUrl == null
-                  ? _CoverPlaceholder(title: video.title)
-                  : Image.network(
-                      coverUrl.toString(),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _CoverPlaceholder(title: video.title),
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                    ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    video.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  if (intro != null && intro.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 120,
+                  height: 76,
+                  child: coverUrl == null
+                      ? _CoverPlaceholder(title: video.title)
+                      : Image.network(
+                          coverUrl.toString(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _CoverPlaceholder(title: video.title),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      intro,
-                      maxLines: 1,
+                      video.title,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.titleMedium,
                     ),
-                  ],
-                  if (tags.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
+                    if (intro != null && intro.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        intro,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                    if (tags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
                         children: [
-                          for (var i = 0; i < tags.length; i++) ...[
-                            if (i != 0) const SizedBox(width: 8),
-                            _MetaPill(text: tags[i]),
-                          ],
+                          for (final tag in tags) _MetaPill(text: tag),
                         ],
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -174,8 +174,6 @@ class _ProfileHeaderCard extends StatelessWidget {
             infoLine('学校', profile?.school ?? ''),
             const SizedBox(height: 6),
             infoLine('年级', profile?.grade ?? ''),
-            const SizedBox(height: 6),
-            infoLine('学院', profile?.academy ?? ''),
           ],
         ),
       ),

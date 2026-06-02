@@ -57,8 +57,8 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
   @override
   Future<Video> fetchVideoById({required int videoId}) async {
     final response = await _client.getVideosApi().apiVideosIdGet(
-          id: videoId.toString(),
-        );
+      id: videoId.toString(),
+    );
 
     final data = response.data?.data;
     if (data == null) {
@@ -74,8 +74,8 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
   @override
   Future<String?> fetchVideoMediaUrl({required int videoId}) async {
     final response = await _client.getVideosApi().apiVideosIdMediaUrlsGet(
-          id: videoId.toString(),
-        );
+      id: videoId.toString(),
+    );
 
     final data = response.data?.data;
     return _extractMediaUrl(data);
@@ -212,7 +212,8 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
       }
 
       for (final entry in map.entries) {
-        if (entry.value is String && (entry.value as String).trim().isNotEmpty) {
+        if (entry.value is String &&
+            (entry.value as String).trim().isNotEmpty) {
           return (entry.value as String).trim();
         }
       }

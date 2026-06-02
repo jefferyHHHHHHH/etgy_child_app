@@ -33,6 +33,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
   double _speed = 1.0;
   Timer? _watchTimer;
   DateTime? _lastWatchReportAt;
+  bool _playCountSynced = false;
   final _commentController = TextEditingController();
 
   @override
@@ -203,6 +204,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
 
   void _startWatchReporting() {
     _watchTimer?.cancel();
+    _lastWatchReportAt = DateTime.now();
     _watchTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       _reportWatchDelta();
     });
@@ -236,6 +238,14 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             watchedSeconds: watchedSeconds,
             completed: completed,
           );
+
+      if (!_playCountSynced) {
+        _playCountSynced = true;
+        final args = VideoEngagementArgs.fromVideo(video);
+        await ref
+            .read(videoEngagementControllerProvider(args).notifier)
+            .refreshPlayCountFromServer();
+      }
     } catch (_) {
       // Best-effort. Ignore reporting failures.
     }
@@ -271,29 +281,29 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                 ),
               )
             : controller == null || _initializeFuture == null
-                ? const Center(child: CircularProgressIndicator())
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                    children: [
-                      _PlayerCard(
-                        controller: controller,
-                        initializeFuture: _initializeFuture!,
-                        speed: _speed,
-                        onSpeedChanged: (value) async {
-                          setState(() => _speed = value);
-                          if (!controller.value.isInitialized) return;
-                          await controller.setPlaybackSpeed(value);
-                        },
-                        onFullscreen: () => _openFullscreen(context),
-                      ),
-                      if (video != null) ...[
-                        const SizedBox(height: 10),
-                        _EngagementBar(video: video),
-                        const SizedBox(height: 12),
-                        _CommentsSection(videoId: video.id),
-                      ],
-                    ],
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                children: [
+                  _PlayerCard(
+                    controller: controller,
+                    initializeFuture: _initializeFuture!,
+                    speed: _speed,
+                    onSpeedChanged: (value) async {
+                      setState(() => _speed = value);
+                      if (!controller.value.isInitialized) return;
+                      await controller.setPlaybackSpeed(value);
+                    },
+                    onFullscreen: () => _openFullscreen(context),
                   ),
+                  if (video != null) ...[
+                    const SizedBox(height: 10),
+                    _EngagementBar(video: video),
+                    const SizedBox(height: 12),
+                    _CommentsSection(videoId: video.id),
+                  ],
+                ],
+              ),
       ),
       bottomNavigationBar: video == null
           ? null
@@ -314,8 +324,9 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                       try {
                         await ref
                             .read(
-                              videoCommentsControllerProvider(video.id)
-                                  .notifier,
+                              videoCommentsControllerProvider(
+                                video.id,
+                              ).notifier,
                             )
                             .post(text);
                         _commentController.clear();
@@ -325,9 +336,9 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                         );
                       } catch (e) {
                         if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(e.toString())),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(e.toString())));
                       }
                     },
                   ),
@@ -345,9 +356,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     final navigator = Navigator.of(context);
 
     try {
-      await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.immersiveSticky,
-      );
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     } catch (_) {
       // Best-effort.
     }
@@ -628,9 +637,9 @@ class _EngagementBar extends ConsumerWidget {
           children: [
             Expanded(
               child: _ActionChip(
-                icon: state.liked
-                    ? Icons.thumb_up_rounded
-                    : Icons.thumb_up_outlined,
+                active: state.liked,
+                activeIcon: Icons.thumb_up_rounded,
+                inactiveIcon: Icons.thumb_up_outlined,
                 label: '点赞 ${state.likeCount}',
                 busy: state.isLiking,
                 onTap: () async {
@@ -648,9 +657,9 @@ class _EngagementBar extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _ActionChip(
-                icon: state.favorited
-                    ? Icons.bookmark_rounded
-                    : Icons.bookmark_outline_rounded,
+                active: state.favorited,
+                activeIcon: Icons.bookmark_rounded,
+                inactiveIcon: Icons.bookmark_outline_rounded,
                 label: '收藏 ${state.favCount}',
                 busy: state.isFavoriting,
                 onTap: () async {
@@ -666,10 +675,7 @@ class _EngagementBar extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              '播放 ${state.playCount}',
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text('播放 ${state.playCount}', style: theme.textTheme.bodyMedium),
           ],
         ),
       ),
@@ -679,13 +685,17 @@ class _EngagementBar extends ConsumerWidget {
 
 class _ActionChip extends StatelessWidget {
   const _ActionChip({
-    required this.icon,
+    required this.active,
+    required this.activeIcon,
+    required this.inactiveIcon,
     required this.label,
     required this.busy,
     required this.onTap,
   });
 
-  final IconData icon;
+  final bool active;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
   final String label;
   final bool busy;
   final VoidCallback onTap;
@@ -693,6 +703,12 @@ class _ActionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final iconColor = active
+        ? AppTheme.ink
+        : AppTheme.ink.withValues(alpha: 0.38);
+    final textColor = active
+        ? AppTheme.ink
+        : AppTheme.ink.withValues(alpha: 0.60);
 
     return Material(
       color: Colors.white,
@@ -710,19 +726,29 @@ class _ActionChip extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               busy
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: iconColor,
+                      ),
                     )
-                  : Icon(icon, size: 18),
+                  : Icon(
+                      active ? activeIcon : inactiveIcon,
+                      size: 18,
+                      color: iconColor,
+                    ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: textColor,
+                    fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                  ),
                 ),
               ),
             ],
@@ -1047,8 +1073,9 @@ class _FullscreenVideoPage extends StatelessWidget {
                           colors: VideoProgressColors(
                             playedColor: AppTheme.coral,
                             bufferedColor: Colors.white.withValues(alpha: 0.30),
-                            backgroundColor:
-                                Colors.white.withValues(alpha: 0.18),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.18,
+                            ),
                           ),
                         ),
                       ),
