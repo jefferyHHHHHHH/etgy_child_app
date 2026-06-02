@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
@@ -32,23 +33,36 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
   double _speed = 1.0;
   Timer? _watchTimer;
   DateTime? _lastWatchReportAt;
-
   final _commentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    unawaited(_prepareAndInitPlayer());
+  }
 
-    final url = widget.video?.url;
-    if (url == null || url.trim().isEmpty) {
-      _errorMessage = '未获取到视频地址';
+  Future<void> _prepareAndInitPlayer() async {
+    final video = widget.video;
+    if (video == null) {
+      setState(() {
+        _errorMessage = '未获取到视频信息';
+      });
       return;
     }
 
-    final raw = url.trim();
-    final uri = Uri.tryParse(raw) ?? Uri.tryParse(Uri.encodeFull(raw));
-    if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
-      _errorMessage = '视频地址格式不正确：$url';
+    final resolvedUrl = await _resolvePlayableUrl(video);
+    if (resolvedUrl == null || resolvedUrl.trim().isEmpty) {
+      setState(() {
+        _errorMessage = '未获取到视频地址';
+      });
+      return;
+    }
+
+    final uri = _tryParseHttpUrl(resolvedUrl);
+    if (uri == null) {
+      setState(() {
+        _errorMessage = '视频地址格式不正确：$resolvedUrl';
+      });
       return;
     }
 
@@ -85,6 +99,35 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             _errorMessage = e.toString();
           });
         });
+  }
+
+  Future<String?> _resolvePlayableUrl(Video video) async {
+    final rawUrl = video.url.trim();
+    final directUri = _tryParseHttpUrl(rawUrl);
+
+    if (directUri != null && _isPresignedS3Url(directUri)) {
+      return rawUrl;
+    }
+
+    final presigned = await ref
+        .read(videoRepositoryProvider)
+        .fetchVideoMediaUrl(videoId: video.id);
+    if (presigned != null && presigned.trim().isNotEmpty) {
+      return presigned.trim();
+    }
+
+    return rawUrl.isEmpty ? null : rawUrl;
+  }
+
+  Uri? _tryParseHttpUrl(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    final uri = Uri.tryParse(trimmed) ?? Uri.tryParse(Uri.encodeFull(trimmed));
+    if (uri == null) return null;
+    if (uri.isScheme('http') || uri.isScheme('https')) {
+      return uri;
+    }
+    return null;
   }
 
   Future<void> _probeVideoUrl(Uri uri, Map<String, String> headers) async {
@@ -241,6 +284,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                           if (!controller.value.isInitialized) return;
                           await controller.setPlaybackSpeed(value);
                         },
+                        onFullscreen: () => _openFullscreen(context),
                       ),
                       if (video != null) ...[
                         const SizedBox(height: 10),
@@ -292,6 +336,47 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
             ),
     );
   }
+
+  Future<void> _openFullscreen(BuildContext context) async {
+    final controller = _controller;
+    if (controller == null) return;
+    if (!controller.value.isInitialized) return;
+
+    final navigator = Navigator.of(context);
+
+    try {
+      await SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.immersiveSticky,
+      );
+    } catch (_) {
+      // Best-effort.
+    }
+
+    if (!mounted) return;
+
+    try {
+      await navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => _FullscreenVideoPage(
+            controller: controller,
+            speed: _speed,
+            onSpeedChanged: (value) async {
+              if (!mounted) return;
+              setState(() => _speed = value);
+              if (!controller.value.isInitialized) return;
+              await controller.setPlaybackSpeed(value);
+            },
+          ),
+        ),
+      );
+    } finally {
+      try {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      } catch (_) {
+        // Best-effort.
+      }
+    }
+  }
 }
 
 class _PlayerCard extends StatelessWidget {
@@ -300,12 +385,14 @@ class _PlayerCard extends StatelessWidget {
     required this.initializeFuture,
     required this.speed,
     required this.onSpeedChanged,
+    required this.onFullscreen,
   });
 
   final VideoPlayerController controller;
   final Future<void> initializeFuture;
   final double speed;
   final ValueChanged<double> onSpeedChanged;
+  final VoidCallback onFullscreen;
 
   @override
   Widget build(BuildContext context) {
@@ -411,34 +498,56 @@ class _PlayerCard extends StatelessWidget {
                     Positioned(
                       top: 10,
                       right: 10,
-                      child: PopupMenuButton<double>(
-                        initialValue: speed,
-                        onSelected: onSpeedChanged,
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(value: 0.5, child: Text('0.5x')),
-                          PopupMenuItem(value: 0.75, child: Text('0.75x')),
-                          PopupMenuItem(value: 1.0, child: Text('1.0x')),
-                          PopupMenuItem(value: 1.25, child: Text('1.25x')),
-                          PopupMenuItem(value: 1.5, child: Text('1.5x')),
-                          PopupMenuItem(value: 2.0, child: Text('2.0x')),
-                        ],
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.28),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            '${speed.toStringAsFixed(speed == 1.0 ? 0 : 2)}x',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PopupMenuButton<double>(
+                            initialValue: speed,
+                            onSelected: onSpeedChanged,
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(value: 0.5, child: Text('0.5x')),
+                              PopupMenuItem(value: 0.75, child: Text('0.75x')),
+                              PopupMenuItem(value: 1.0, child: Text('1.0x')),
+                              PopupMenuItem(value: 1.25, child: Text('1.25x')),
+                              PopupMenuItem(value: 1.5, child: Text('1.5x')),
+                              PopupMenuItem(value: 2.0, child: Text('2.0x')),
+                            ],
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.28),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                '${speed.toStringAsFixed(speed == 1.0 ? 0 : 2)}x',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Material(
+                            color: Colors.black.withValues(alpha: 0.28),
+                            shape: const CircleBorder(),
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: onFullscreen,
+                              child: const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.fullscreen_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Positioned(
@@ -506,9 +615,10 @@ class _EngagementBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final state = ref.watch(videoEngagementControllerProvider(video));
+    final args = VideoEngagementArgs.fromVideo(video);
+    final state = ref.watch(videoEngagementControllerProvider(args));
     final controller = ref.read(
-      videoEngagementControllerProvider(video).notifier,
+      videoEngagementControllerProvider(args).notifier,
     );
 
     return Card(
@@ -557,7 +667,7 @@ class _EngagementBar extends ConsumerWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              '播放 ${video.metrics?.playCount ?? 0}',
+              '播放 ${state.playCount}',
               style: theme.textTheme.bodyMedium,
             ),
           ],
@@ -822,4 +932,154 @@ String _formatDateTime(DateTime dt) {
   final hh = local.hour.toString().padLeft(2, '0');
   final mi = local.minute.toString().padLeft(2, '0');
   return '$mm-$dd $hh:$mi';
+}
+
+class _FullscreenVideoPage extends StatelessWidget {
+  const _FullscreenVideoPage({
+    required this.controller,
+    required this.speed,
+    required this.onSpeedChanged,
+  });
+
+  final VideoPlayerController controller;
+  final double speed;
+  final ValueChanged<double> onSpeedChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: ValueListenableBuilder<VideoPlayerValue>(
+          valueListenable: controller,
+          builder: (context, value, _) {
+            final isReady = value.isInitialized;
+            final isPlaying = value.isPlaying;
+            final duration = value.duration;
+            final position = value.position;
+
+            final aspect = value.aspectRatio == 0 ? 16 / 9 : value.aspectRatio;
+
+            return Stack(
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: aspect,
+                    child: GestureDetector(
+                      onTap: !isReady
+                          ? null
+                          : () {
+                              if (isPlaying) {
+                                controller.pause();
+                              } else {
+                                controller.play();
+                              }
+                            },
+                      child: VideoPlayer(controller),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Material(
+                    color: Colors.black.withValues(alpha: 0.28),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: PopupMenuButton<double>(
+                    initialValue: speed,
+                    onSelected: onSpeedChanged,
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(value: 0.5, child: Text('0.5x')),
+                      PopupMenuItem(value: 0.75, child: Text('0.75x')),
+                      PopupMenuItem(value: 1.0, child: Text('1.0x')),
+                      PopupMenuItem(value: 1.25, child: Text('1.25x')),
+                      PopupMenuItem(value: 1.5, child: Text('1.5x')),
+                      PopupMenuItem(value: 2.0, child: Text('2.0x')),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.28),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${speed.toStringAsFixed(speed == 1.0 ? 0 : 2)}x',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: VideoProgressIndicator(
+                          controller,
+                          allowScrubbing: true,
+                          colors: VideoProgressColors(
+                            playedColor: AppTheme.coral,
+                            bufferedColor: Colors.white.withValues(alpha: 0.30),
+                            backgroundColor:
+                                Colors.white.withValues(alpha: 0.18),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            _formatTime(position),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            _formatTime(duration),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

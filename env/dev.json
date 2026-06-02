@@ -1,6 +1,6 @@
 {
   "APP_ENV": "dev",
-  "API_BASE_URL": "http://8.148.215.20",
+  "API_BASE_URL": "http://8.166.119.160/",
   "AGORA_APP_ID": "",
   "ENABLE_NETWORK_LOG": "true",
   "ENABLE_MOCK_AUTH": "false"

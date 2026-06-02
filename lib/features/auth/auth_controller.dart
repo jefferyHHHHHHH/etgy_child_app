@@ -69,7 +69,9 @@ class AuthController extends Notifier<AuthState> {
           .timeout(const Duration(seconds: 5));
 
       if (kDebugMode) {
-        debugPrint('[AuthController] restoreSession() done; hasSession=${session != null}');
+        debugPrint(
+          '[AuthController] restoreSession() done; hasSession=${session != null}',
+        );
       }
 
       if (session == null) {
@@ -116,7 +118,11 @@ class AuthController extends Notifier<AuthState> {
     if (kDebugMode) {
       debugPrint('[AuthController] signIn() begin; account=$account');
     }
-    state = state.copyWith(isLoading: true, clearError: true, isHydrating: false);
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      isHydrating: false,
+    );
 
     try {
       final session = await ref
@@ -144,15 +150,21 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> confirmDeviceBinding() async {
+    if (state.isLoading) {
+      return;
+    }
+    state = state.copyWith(isLoading: true, clearError: true);
     final bindToken = state.bindToken;
     final user = state.user;
     if (bindToken == null || bindToken.isEmpty || user == null) {
-      state = state.copyWith(errorMessage: '绑定凭证已失效，请重新登录');
+      state = state.copyWith(isLoading: false, errorMessage: '绑定凭证已失效，请重新登录');
       return;
     }
 
     try {
-      final updated = await ref.read(authRepositoryProvider).confirmDeviceBinding(
+      final updated = await ref
+          .read(authRepositoryProvider)
+          .confirmDeviceBinding(
             AuthSession(
               token: '',
               status: state.status,
@@ -164,7 +176,7 @@ class AuthController extends Notifier<AuthState> {
       state = _fromSession(updated);
     } catch (error) {
       final appError = AppExceptionMapper.from(error);
-      state = state.copyWith(errorMessage: appError.message);
+      state = state.copyWith(isLoading: false, errorMessage: appError.message);
     }
   }
 

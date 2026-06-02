@@ -22,11 +22,17 @@ class AppConfig {
     const env = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
     const baseUrl = String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'https://dev-api.example.com',
+      defaultValue: 'http://8.166.119.160/',
     );
     const agoraAppId = String.fromEnvironment('AGORA_APP_ID', defaultValue: '');
-    const enableLog = bool.fromEnvironment('ENABLE_NETWORK_LOG', defaultValue: true);
-    const enableMockAuth = bool.fromEnvironment('ENABLE_MOCK_AUTH', defaultValue: false);
+    const enableLog = bool.fromEnvironment(
+      'ENABLE_NETWORK_LOG',
+      defaultValue: true,
+    );
+    const enableMockAuth = bool.fromEnvironment(
+      'ENABLE_MOCK_AUTH',
+      defaultValue: false,
+    );
 
     final flavor = env.toLowerCase() == 'prod' ? AppFlavor.prod : AppFlavor.dev;
 

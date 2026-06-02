@@ -89,7 +89,7 @@ class HomePage extends ConsumerWidget {
                           }
 
                           return SizedBox(
-                            height: 210,
+                            height: 232,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: show.length,
@@ -175,11 +175,7 @@ class _HomeEntryCard extends StatelessWidget {
         onTap: () => context.push(item.route),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.white, item.color.withValues(alpha: 0.10)],
-            ),
+            color: item.color.withValues(alpha: 0.08),
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -187,18 +183,16 @@ class _HomeEntryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 42,
-                  height: 42,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: item.color.withValues(alpha: 0.22),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(item.icon, color: item.color),
+                  child: Icon(item.icon, size: 22, color: item.color),
                 ),
                 const Spacer(),
                 Text(item.title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text('点击进入', style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
@@ -238,17 +232,17 @@ class _HomeVideoCard extends StatelessWidget {
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     video.title,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   Text(
                     (video.subjectTag ?? video.gradeRange ?? '').toString(),
                     maxLines: 1,

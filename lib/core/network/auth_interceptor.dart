@@ -6,10 +6,12 @@ class AuthInterceptor extends Interceptor {
   final String? Function() tokenReader;
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final security = options.extra['secure'];
+    if (security is List && security.isEmpty) {
+      handler.next(options);
+      return;
+    }
     final token = tokenReader();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';

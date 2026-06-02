@@ -12,6 +12,14 @@ class VideoRepository {
 
   final VideoRemoteDataSource remote;
 
+  Future<Video> fetchVideoById({required int videoId}) {
+    return remote.fetchVideoById(videoId: videoId);
+  }
+
+  Future<String?> fetchVideoMediaUrl({required int videoId}) {
+    return remote.fetchVideoMediaUrl(videoId: videoId);
+  }
+
   Future<List<Video>> fetchPublicVideos({
     String? grade,
     String? subject,

@@ -36,7 +36,10 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((Ref ref) {
 });
 
 abstract class AuthRemoteDataSource {
-  Future<AuthSession> signIn({required String account, required String password});
+  Future<AuthSession> signIn({
+    required String account,
+    required String password,
+  });
 
   Future<AuthSession> confirmDeviceBinding({required String bindToken});
 }
@@ -111,7 +114,9 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
         }
       } catch (_) {
         final trimmed = raw.trim();
-        final preview = trimmed.length > 200 ? '${trimmed.substring(0, 200)}...' : trimmed;
+        final preview = trimmed.length > 200
+            ? '${trimmed.substring(0, 200)}...'
+            : trimmed;
         throw AppException(
           type: AppExceptionType.server,
           message: '服务响应不是有效 JSON：$preview',
@@ -176,12 +181,15 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
 
     if (bindRequired && bindToken.isNotEmpty) {
       final userMap = _toUserMap(dataMap['user']);
-      final status = _parseStatus((userMap['status'] as String?) ?? 'pendingActivation');
+      final status = _parseStatus(
+        (userMap['status'] as String?) ?? 'pendingActivation',
+      );
       final user = UserProfile(
         name: _readName(userMap, fallback: account),
         school: (userMap['school'] as String?) ?? '',
         grade: (userMap['grade'] as String?) ?? '',
-        academy: (userMap['academy'] as String?) ??
+        academy:
+            (userMap['academy'] as String?) ??
             (userMap['collegeName'] as String?) ??
             '',
       );
@@ -197,15 +205,20 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
 
     final token = (dataMap['token'] as String?) ?? '';
     final userMap = _toUserMap(dataMap['user']);
-    final status = _parseStatus((userMap['status'] as String?) ?? 'pendingActivation');
+    final status = _parseStatus(
+      (userMap['status'] as String?) ?? 'pendingActivation',
+    );
     final deviceBound =
-        (userMap['isDeviceBound'] as bool?) ?? (userMap['deviceBound'] as bool?) ?? false;
+        (userMap['isDeviceBound'] as bool?) ??
+        (userMap['deviceBound'] as bool?) ??
+        (status == AccountStatus.active);
 
     final user = UserProfile(
       name: _readName(userMap, fallback: account),
       school: (userMap['school'] as String?) ?? '',
       grade: (userMap['grade'] as String?) ?? '',
-      academy: (userMap['academy'] as String?) ??
+      academy:
+          (userMap['academy'] as String?) ??
           (userMap['collegeName'] as String?) ??
           '',
     );
@@ -224,12 +237,9 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
 
   @override
   Future<AuthSession> confirmDeviceBinding({required String bindToken}) async {
-
     final response = await _openapiClient.dio.post<dynamic>(
       '/api/auth/device/bind/confirm',
-      data: <String, dynamic>{
-        'bindToken': bindToken,
-      },
+      data: <String, dynamic>{'bindToken': bindToken},
       options: Options(contentType: Headers.jsonContentType),
     );
 
@@ -257,7 +267,10 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
       name: _readName(userMap, fallback: '用户'),
       school: (userMap['school'] as String?) ?? '',
       grade: (userMap['grade'] as String?) ?? '',
-      academy: (userMap['academy'] as String?) ?? (userMap['collegeName'] as String?) ?? '',
+      academy:
+          (userMap['academy'] as String?) ??
+          (userMap['collegeName'] as String?) ??
+          '',
     );
 
     return AuthSession(
@@ -269,7 +282,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
   }
 
   AccountStatus _parseStatus(String raw) {
-    switch (raw) {
+    switch (raw.trim().toLowerCase()) {
       case 'active':
         return AccountStatus.active;
       case 'frozen':

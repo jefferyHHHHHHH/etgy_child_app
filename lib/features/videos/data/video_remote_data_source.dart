@@ -13,6 +13,10 @@ final videoRemoteDataSourceProvider = Provider<VideoRemoteDataSource>((
 });
 
 abstract class VideoRemoteDataSource {
+  Future<Video> fetchVideoById({required int videoId});
+
+  Future<String?> fetchVideoMediaUrl({required int videoId});
+
   Future<List<Video>> fetchPublicVideos({
     String? grade,
     String? subject,
@@ -49,6 +53,33 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
   OpenApiVideoRemoteDataSource(this._client);
 
   final EtgyOpenapiClient _client;
+
+  @override
+  Future<Video> fetchVideoById({required int videoId}) async {
+    final response = await _client.getVideosApi().apiVideosIdGet(
+          id: videoId.toString(),
+        );
+
+    final data = response.data?.data;
+    if (data == null) {
+      throw const AppException(
+        type: AppExceptionType.unknown,
+        message: '服务返回为空，请稍后重试',
+      );
+    }
+
+    return data;
+  }
+
+  @override
+  Future<String?> fetchVideoMediaUrl({required int videoId}) async {
+    final response = await _client.getVideosApi().apiVideosIdMediaUrlsGet(
+          id: videoId.toString(),
+        );
+
+    final data = response.data?.data;
+    return _extractMediaUrl(data);
+  }
 
   @override
   Future<List<Video>> fetchPublicVideos({
@@ -152,5 +183,40 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
         completed: completed,
       ),
     );
+  }
+
+  String? _extractMediaUrl(Object? data) {
+    if (data == null) {
+      return null;
+    }
+    if (data is String) {
+      final value = data.trim();
+      return value.isEmpty ? null : value;
+    }
+    if (data is Map) {
+      final map = data.map((key, value) => MapEntry(key.toString(), value));
+      const preferredKeys = [
+        'videoUrl',
+        'video_url',
+        'url',
+        'playUrl',
+        'play_url',
+        'mediaUrl',
+        'media_url',
+      ];
+      for (final key in preferredKeys) {
+        final value = map[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+
+      for (final entry in map.entries) {
+        if (entry.value is String && (entry.value as String).trim().isNotEmpty) {
+          return (entry.value as String).trim();
+        }
+      }
+    }
+    return null;
   }
 }
