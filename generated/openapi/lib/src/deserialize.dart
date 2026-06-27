@@ -1,3 +1,5 @@
+import 'package:etgy_openapi_client/src/model/admin_video_item.dart';
+import 'package:etgy_openapi_client/src/model/admin_video_paged_result.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response_all_of_data.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response_all_of_data_items_inner.dart';
@@ -70,6 +72,7 @@ import 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_p
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_password_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_status_patch_request.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_suspend_patch_request.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_admin_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_get200_response.dart';
@@ -94,6 +97,7 @@ import 'package:etgy_openapi_client/src/model/live_room_paged_result.dart';
 import 'package:etgy_openapi_client/src/model/live_stream_info.dart';
 import 'package:etgy_openapi_client/src/model/video.dart';
 import 'package:etgy_openapi_client/src/model/video_comment.dart';
+import 'package:etgy_openapi_client/src/model/video_media_urls.dart';
 import 'package:etgy_openapi_client/src/model/video_metrics.dart';
 import 'package:etgy_openapi_client/src/model/video_watch_log.dart';
 
@@ -115,6 +119,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (valueString == 'true' || valueString == '1') as ReturnType;
         case 'double':
           return (value is double ? value : double.parse('$value')) as ReturnType;
+        case 'AdminVideoItem':
+          return AdminVideoItem.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminVideoPagedResult':
+          return AdminVideoPagedResult.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAiRiskAlertsGet200Response':
           return ApiAiRiskAlertsGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiAiRiskAlertsGet200ResponseAllOfData':
@@ -259,6 +267,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiUsersVolunteersIdStatusPatchRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiUsersVolunteersIdSuspendPatchRequest':
           return ApiUsersVolunteersIdSuspendPatchRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiVideosAdminGet200Response':
+          return ApiVideosAdminGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosAuditBatchPostRequest':
           return ApiVideosAuditBatchPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosCommentsCommentIdAuditPostRequest':
@@ -307,6 +317,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return Video.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'VideoComment':
           return VideoComment.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'VideoMediaUrls':
+          return VideoMediaUrls.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'VideoMetrics':
           return VideoMetrics.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'VideoWatchLog':

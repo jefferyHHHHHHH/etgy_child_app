@@ -18,7 +18,7 @@ import 'package:etgy_openapi_client/src/api/users_api.dart';
 import 'package:etgy_openapi_client/src/api/videos_api.dart';
 
 class EtgyOpenapiClient {
-  static const String basePath = r'http://8.148.215.20';
+  static const String basePath = r'http://8.166.115.78';
 
   final Dio dio;
   EtgyOpenapiClient({

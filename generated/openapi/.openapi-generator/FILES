@@ -3,6 +3,8 @@ README.md
 analysis_options.yaml
 build.yaml
 doc/AIApi.md
+doc/AdminVideoItem.md
+doc/AdminVideoPagedResult.md
 doc/ApiAiRiskAlertsGet200Response.md
 doc/ApiAiRiskAlertsGet200ResponseAllOfData.md
 doc/ApiAiRiskAlertsGet200ResponseAllOfDataItemsInner.md
@@ -75,6 +77,7 @@ doc/ApiUsersVolunteersBatchExcelPost201ResponseAllOfDataResultsInnerAnyOf1.md
 doc/ApiUsersVolunteersIdPasswordPostRequest.md
 doc/ApiUsersVolunteersIdStatusPatchRequest.md
 doc/ApiUsersVolunteersIdSuspendPatchRequest.md
+doc/ApiVideosAdminGet200Response.md
 doc/ApiVideosAuditBatchPostRequest.md
 doc/ApiVideosCommentsCommentIdAuditPostRequest.md
 doc/ApiVideosGet200Response.md
@@ -106,6 +109,7 @@ doc/PlatformApi.md
 doc/UsersApi.md
 doc/Video.md
 doc/VideoComment.md
+doc/VideoMediaUrls.md
 doc/VideoMetrics.md
 doc/VideoWatchLog.md
 doc/VideosApi.md
@@ -126,6 +130,8 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/deserialize.dart
+lib/src/model/admin_video_item.dart
+lib/src/model/admin_video_paged_result.dart
 lib/src/model/api_ai_risk_alerts_get200_response.dart
 lib/src/model/api_ai_risk_alerts_get200_response_all_of_data.dart
 lib/src/model/api_ai_risk_alerts_get200_response_all_of_data_items_inner.dart
@@ -198,6 +204,7 @@ lib/src/model/api_users_volunteers_batch_excel_post201_response_all_of_data_resu
 lib/src/model/api_users_volunteers_id_password_post_request.dart
 lib/src/model/api_users_volunteers_id_status_patch_request.dart
 lib/src/model/api_users_volunteers_id_suspend_patch_request.dart
+lib/src/model/api_videos_admin_get200_response.dart
 lib/src/model/api_videos_audit_batch_post_request.dart
 lib/src/model/api_videos_comments_comment_id_audit_post_request.dart
 lib/src/model/api_videos_get200_response.dart
@@ -222,18 +229,11 @@ lib/src/model/live_room_paged_result.dart
 lib/src/model/live_stream_info.dart
 lib/src/model/video.dart
 lib/src/model/video_comment.dart
+lib/src/model/video_media_urls.dart
 lib/src/model/video_metrics.dart
 lib/src/model/video_watch_log.dart
 pubspec.yaml
-test/api_auth_device_bind_confirm_post200_response_test.dart
-test/api_auth_device_bind_confirm_post_request_device_info_test.dart
-test/api_auth_device_bind_confirm_post_request_test.dart
-test/api_auth_login_post200_response_all_of_data_any_of1_test.dart
-test/api_auth_login_post200_response_all_of_data_any_of_test.dart
-test/api_auth_login_post_request_device_info_test.dart
-test/api_live_get200_response_test.dart
-test/api_live_id_stream_get200_response_test.dart
-test/api_users_volunteers_id_password_post_request_test.dart
-test/children_api_test.dart
-test/live_room_paged_result_test.dart
-test/live_stream_info_test.dart
+test/admin_video_item_test.dart
+test/admin_video_paged_result_test.dart
+test/api_videos_admin_get200_response_test.dart
+test/video_media_urls_test.dart

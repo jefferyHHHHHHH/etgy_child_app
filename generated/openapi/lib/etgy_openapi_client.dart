@@ -19,6 +19,8 @@ export 'package:etgy_openapi_client/src/api/platform_api.dart';
 export 'package:etgy_openapi_client/src/api/users_api.dart';
 export 'package:etgy_openapi_client/src/api/videos_api.dart';
 
+export 'package:etgy_openapi_client/src/model/admin_video_item.dart';
+export 'package:etgy_openapi_client/src/model/admin_video_paged_result.dart';
 export 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response.dart';
 export 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response_all_of_data.dart';
 export 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response_all_of_data_items_inner.dart';
@@ -91,6 +93,7 @@ export 'package:etgy_openapi_client/src/model/api_users_volunteers_batch_excel_p
 export 'package:etgy_openapi_client/src/model/api_users_volunteers_id_password_post_request.dart';
 export 'package:etgy_openapi_client/src/model/api_users_volunteers_id_status_patch_request.dart';
 export 'package:etgy_openapi_client/src/model/api_users_volunteers_id_suspend_patch_request.dart';
+export 'package:etgy_openapi_client/src/model/api_videos_admin_get200_response.dart';
 export 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
 export 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
 export 'package:etgy_openapi_client/src/model/api_videos_get200_response.dart';
@@ -115,6 +118,7 @@ export 'package:etgy_openapi_client/src/model/live_room_paged_result.dart';
 export 'package:etgy_openapi_client/src/model/live_stream_info.dart';
 export 'package:etgy_openapi_client/src/model/video.dart';
 export 'package:etgy_openapi_client/src/model/video_comment.dart';
+export 'package:etgy_openapi_client/src/model/video_media_urls.dart';
 export 'package:etgy_openapi_client/src/model/video_metrics.dart';
 export 'package:etgy_openapi_client/src/model/video_watch_log.dart';
 

@@ -5,7 +5,7 @@
 import 'package:etgy_openapi_client/api.dart';
 ```
 
-All URIs are relative to *http://8.148.215.20*
+All URIs are relative to *http://8.166.115.78*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -35,11 +35,11 @@ Method | HTTP request | Description
 
 
 # **apiVideosAdminGet**
-> ApiAuthRegisterPost201Response apiVideosAdminGet(status, collegeId, uploaderId, search, grade, subject, sort, page, pageSize)
+> ApiVideosAdminGet200Response apiVideosAdminGet(status, collegeId, uploaderId, search, grade, subject, sort, page, pageSize)
 
 管理端视频列表（学院/平台管理员）
 
-管理端使用：默认返回待审核(REVIEW)视频，可按 status/collegeId/uploaderId/search 等筛选。平台管理员可跨学院查看；学院管理员仅能查看本学院。
+管理端使用：学院管理员默认返回待审核(REVIEW)视频；平台管理员默认返回全量状态视频。可按 status/collegeId/uploaderId/search 等筛选。返回结果会附带 video/cover 的 presigned GET URL（用于列表预览/播放）。
 
 ### Example
 ```dart
@@ -80,7 +80,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+[**ApiVideosAdminGet200Response**](ApiVideosAdminGet200Response.md)
 
 ### Authorization
 
@@ -827,12 +827,14 @@ This endpoint does not need any parameter.
 
 志愿者查看我的视频列表（可按状态筛选）
 
+返回我的视频列表，并将每条视频的 url/coverUrl 自动转换为可播放的 presigned GET URL（便于前端直接预览/播放）。status=ALL 表示不按状态筛选。
+
 ### Example
 ```dart
 import 'package:etgy_openapi_client/api.dart';
 
 final api = EtgyOpenapiClient().getVideosApi();
-final String status = status_example; // String | 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）
+final String status = status_example; // String | 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）；传 ALL 表示不按状态筛选
 final String search = search_example; // String | 按标题/简介模糊搜索（仅我的视频）
 final String grade = grade_example; // String | 
 final String subject = subject_example; // String | 
@@ -852,7 +854,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **status** | **String**| 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等） | [optional] 
+ **status** | **String**| 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）；传 ALL 表示不按状态筛选 | [optional] 
  **search** | **String**| 按标题/简介模糊搜索（仅我的视频） | [optional] 
  **grade** | **String**|  | [optional] 
  **subject** | **String**|  | [optional] 

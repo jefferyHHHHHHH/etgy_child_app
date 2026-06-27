@@ -16,6 +16,7 @@ import 'package:etgy_openapi_client/src/model/api_ai_tutor_chat_post200_response
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_chat_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_tutor_conversations_id_get200_response.dart';
+import 'package:etgy_openapi_client/src/model/error_response.dart';
 
 class AIApi {
 
@@ -289,6 +290,77 @@ _responseData = rawData == null ? null : deserialize<ApiAiTutorChatPost200Respon
       statusMessage: _response.statusMessage,
       extra: _response.extra,
     );
+  }
+
+  /// AI 辅导流式对话 (SSE)
+  /// 通过 SSE 协议实现打字机效果的流式 AI 对话。事件: text_chunk, text_complete, error, done。
+  ///
+  /// Parameters:
+  /// * [apiAiTutorChatPostRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> apiAiTutorChatStreamPost({ 
+    ApiAiTutorChatPostRequest? apiAiTutorChatPostRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/ai/tutor/chat/stream';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+_bodyData=jsonEncode(apiAiTutorChatPostRequest);
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
   }
 
   /// 获取 AI 辅导会话列表（儿童）

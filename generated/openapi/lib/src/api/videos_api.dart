@@ -10,6 +10,7 @@ import 'package:etgy_openapi_client/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
 import 'package:etgy_openapi_client/src/model/api_auth_register_post201_response.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_admin_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_get200_response.dart';
@@ -33,7 +34,7 @@ class VideosApi {
   const VideosApi(this._dio);
 
   /// 管理端视频列表（学院/平台管理员）
-  /// 管理端使用：默认返回待审核(REVIEW)视频，可按 status/collegeId/uploaderId/search 等筛选。平台管理员可跨学院查看；学院管理员仅能查看本学院。
+  /// 管理端使用：学院管理员默认返回待审核(REVIEW)视频；平台管理员默认返回全量状态视频。可按 status/collegeId/uploaderId/search 等筛选。返回结果会附带 video/cover 的 presigned GET URL（用于列表预览/播放）。
   ///
   /// Parameters:
   /// * [status] 
@@ -52,9 +53,9 @@ class VideosApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Returns a [Future] containing a [Response] with a [ApiVideosAdminGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<ApiAuthRegisterPost201Response>> apiVideosAdminGet({ 
+  Future<Response<ApiVideosAdminGet200Response>> apiVideosAdminGet({ 
     String? status,
     int? collegeId,
     int? uploaderId,
@@ -111,11 +112,11 @@ class VideosApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    ApiAuthRegisterPost201Response? _responseData;
+    ApiVideosAdminGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+_responseData = rawData == null ? null : deserialize<ApiVideosAdminGet200Response, ApiVideosAdminGet200Response>(rawData, 'ApiVideosAdminGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -127,7 +128,7 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
       );
     }
 
-    return Response<ApiAuthRegisterPost201Response>(
+    return Response<ApiVideosAdminGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1617,10 +1618,10 @@ _responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Respo
   }
 
   /// 志愿者查看我的视频列表（可按状态筛选）
-  /// 
+  /// 返回我的视频列表，并将每条视频的 url/coverUrl 自动转换为可播放的 presigned GET URL（便于前端直接预览/播放）。status&#x3D;ALL 表示不按状态筛选。
   ///
   /// Parameters:
-  /// * [status] - 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）
+  /// * [status] - 按视频状态筛选（如 REVIEW/REJECTED/APPROVED/PUBLISHED 等）；传 ALL 表示不按状态筛选
   /// * [search] - 按标题/简介模糊搜索（仅我的视频）
   /// * [grade] 
   /// * [subject] 

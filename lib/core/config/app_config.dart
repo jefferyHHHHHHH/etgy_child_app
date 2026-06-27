@@ -22,7 +22,7 @@ class AppConfig {
     const env = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
     const baseUrl = String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://8.166.119.160/',
+      defaultValue: 'http://8.166.115.78',
     );
     const agoraAppId = String.fromEnvironment('AGORA_APP_ID', defaultValue: '');
     const enableLog = bool.fromEnvironment(

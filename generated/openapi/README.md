@@ -65,13 +65,14 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://8.148.215.20*
+All URIs are relative to *http://8.166.115.78*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 [*AIApi*](doc/AIApi.md) | [**apiAiRiskAlertsGet**](doc/AIApi.md#apiairiskalertsget) | **GET** /api/ai/risk-alerts | AI 风险告警列表（学院/平台）
 [*AIApi*](doc/AIApi.md) | [**apiAiRiskAlertsIdHandlePatch**](doc/AIApi.md#apiairiskalertsidhandlepatch) | **PATCH** /api/ai/risk-alerts/{id}/handle | 处理 AI 风险告警
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorChatPost**](doc/AIApi.md#apiaitutorchatpost) | **POST** /api/ai/tutor/chat | 儿童 AI 辅导对话
+[*AIApi*](doc/AIApi.md) | [**apiAiTutorChatStreamPost**](doc/AIApi.md#apiaitutorchatstreampost) | **POST** /api/ai/tutor/chat/stream | AI 辅导流式对话 (SSE)
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorConversationsGet**](doc/AIApi.md#apiaitutorconversationsget) | **GET** /api/ai/tutor/conversations | 获取 AI 辅导会话列表（儿童）
 [*AIApi*](doc/AIApi.md) | [**apiAiTutorConversationsIdGet**](doc/AIApi.md#apiaitutorconversationsidget) | **GET** /api/ai/tutor/conversations/{id} | 获取 AI 辅导会话详情（儿童）
 [*AuthApi*](doc/AuthApi.md) | [**apiAuthDeviceBindConfirmPost**](doc/AuthApi.md#apiauthdevicebindconfirmpost) | **POST** /api/auth/device/bind/confirm | 确认设备绑定（儿童端）
@@ -167,6 +168,8 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AdminVideoItem](doc/AdminVideoItem.md)
+ - [AdminVideoPagedResult](doc/AdminVideoPagedResult.md)
  - [ApiAiRiskAlertsGet200Response](doc/ApiAiRiskAlertsGet200Response.md)
  - [ApiAiRiskAlertsGet200ResponseAllOfData](doc/ApiAiRiskAlertsGet200ResponseAllOfData.md)
  - [ApiAiRiskAlertsGet200ResponseAllOfDataItemsInner](doc/ApiAiRiskAlertsGet200ResponseAllOfDataItemsInner.md)
@@ -239,6 +242,7 @@ Class | Method | HTTP request | Description
  - [ApiUsersVolunteersIdPasswordPostRequest](doc/ApiUsersVolunteersIdPasswordPostRequest.md)
  - [ApiUsersVolunteersIdStatusPatchRequest](doc/ApiUsersVolunteersIdStatusPatchRequest.md)
  - [ApiUsersVolunteersIdSuspendPatchRequest](doc/ApiUsersVolunteersIdSuspendPatchRequest.md)
+ - [ApiVideosAdminGet200Response](doc/ApiVideosAdminGet200Response.md)
  - [ApiVideosAuditBatchPostRequest](doc/ApiVideosAuditBatchPostRequest.md)
  - [ApiVideosCommentsCommentIdAuditPostRequest](doc/ApiVideosCommentsCommentIdAuditPostRequest.md)
  - [ApiVideosGet200Response](doc/ApiVideosGet200Response.md)
@@ -263,6 +267,7 @@ Class | Method | HTTP request | Description
  - [LiveStreamInfo](doc/LiveStreamInfo.md)
  - [Video](doc/Video.md)
  - [VideoComment](doc/VideoComment.md)
+ - [VideoMediaUrls](doc/VideoMediaUrls.md)
  - [VideoMetrics](doc/VideoMetrics.md)
  - [VideoWatchLog](doc/VideoWatchLog.md)
 

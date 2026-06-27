@@ -20,7 +20,7 @@ class ApiAiTutorChatPostRequest {
   /// Returns a new [ApiAiTutorChatPostRequest] instance.
   ApiAiTutorChatPostRequest({
 
-     this.mode = const ApiAiTutorChatPostRequestModeEnum._('study'),
+     this.mode = ApiAiTutorChatPostRequestModeEnum.study,
 
     required  this.message,
 

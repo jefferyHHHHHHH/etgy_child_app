@@ -5,7 +5,7 @@
 import 'package:etgy_openapi_client/api.dart';
 ```
 
-All URIs are relative to *http://8.148.215.20*
+All URIs are relative to *http://8.166.115.78*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

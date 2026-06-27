@@ -5,13 +5,14 @@
 import 'package:etgy_openapi_client/api.dart';
 ```
 
-All URIs are relative to *http://8.148.215.20*
+All URIs are relative to *http://8.166.115.78*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**apiAiRiskAlertsGet**](AIApi.md#apiairiskalertsget) | **GET** /api/ai/risk-alerts | AI 风险告警列表（学院/平台）
 [**apiAiRiskAlertsIdHandlePatch**](AIApi.md#apiairiskalertsidhandlepatch) | **PATCH** /api/ai/risk-alerts/{id}/handle | 处理 AI 风险告警
 [**apiAiTutorChatPost**](AIApi.md#apiaitutorchatpost) | **POST** /api/ai/tutor/chat | 儿童 AI 辅导对话
+[**apiAiTutorChatStreamPost**](AIApi.md#apiaitutorchatstreampost) | **POST** /api/ai/tutor/chat/stream | AI 辅导流式对话 (SSE)
 [**apiAiTutorConversationsGet**](AIApi.md#apiaitutorconversationsget) | **GET** /api/ai/tutor/conversations | 获取 AI 辅导会话列表（儿童）
 [**apiAiTutorConversationsIdGet**](AIApi.md#apiaitutorconversationsidget) | **GET** /api/ai/tutor/conversations/{id} | 获取 AI 辅导会话详情（儿童）
 
@@ -139,6 +140,48 @@ Name | Type | Description  | Notes
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiAiTutorChatStreamPost**
+> apiAiTutorChatStreamPost(apiAiTutorChatPostRequest)
+
+AI 辅导流式对话 (SSE)
+
+通过 SSE 协议实现打字机效果的流式 AI 对话。事件: text_chunk, text_complete, error, done。
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getAIApi();
+final ApiAiTutorChatPostRequest apiAiTutorChatPostRequest = ; // ApiAiTutorChatPostRequest | 
+
+try {
+    api.apiAiTutorChatStreamPost(apiAiTutorChatPostRequest);
+} on DioException catch (e) {
+    print('Exception when calling AIApi->apiAiTutorChatStreamPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **apiAiTutorChatPostRequest** | [**ApiAiTutorChatPostRequest**](ApiAiTutorChatPostRequest.md)|  | [optional] 
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
