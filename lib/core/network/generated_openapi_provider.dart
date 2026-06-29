@@ -11,7 +11,21 @@ import 'debug_network_interceptor.dart';
 final generatedOpenapiClientProvider = Provider<EtgyOpenapiClient>((Ref ref) {
   final config = ref.watch(appConfigProvider);
 
-  final client = EtgyOpenapiClient(basePathOverride: config.apiBaseUrl);
+  // OpenAPI 生成代码默认 receiveTimeout 仅 3s，弱网或慢接口容易超时。
+  // 与 app_api_client 保持一致，避免评论/视频等接口偶发 receive timeout。
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: config.apiBaseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(seconds: 10),
+      headers: const <String, String>{
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
+
+  final client = EtgyOpenapiClient(dio: dio);
 
   // IMPORTANT: Don't depend on authControllerProvider here.
   // This provider is used by authRepository/authRemoteDataSource, and authController

@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/playful_background.dart';
 import '../../auth/auth_controller.dart';
 import '../../videos/data/video_repository.dart';
+import '../../videos/my_comments_store.dart';
 import '../../videos/video_controller.dart';
 import '../../videos/video_engagement_store.dart';
 
@@ -26,6 +27,9 @@ class ProfilePage extends ConsumerWidget {
     final favoritedIds = store.favoritedIds;
 
     final videos = ref.watch(videoListControllerProvider);
+    final myCommentsCount = ref.watch(
+      myCommentsStoreProvider.select((s) => s.comments.length),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('个人资料')),
@@ -54,7 +58,21 @@ class ProfilePage extends ConsumerWidget {
                     color: AppTheme.coral,
                   ),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _StatCard(
+                    title: '评论',
+                    value: myCommentsCount,
+                    icon: Icons.chat_bubble_outline_rounded,
+                    color: AppTheme.mint,
+                  ),
+                ),
               ],
+            ),
+            const SizedBox(height: 16),
+            _MyCommentsPreviewCard(
+              commentCount: myCommentsCount,
+              onTap: () => context.push(AppRoutes.myComments),
             ),
             const SizedBox(height: 16),
             Text('我的收藏', style: theme.textTheme.titleLarge),
@@ -377,6 +395,68 @@ class _EmptyHint extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
         child: Text(text),
+      ),
+    );
+  }
+}
+
+class _MyCommentsPreviewCard extends StatelessWidget {
+  const _MyCommentsPreviewCard({
+    required this.commentCount,
+    required this.onTap,
+  });
+
+  final int commentCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppTheme.mint.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: AppTheme.mint,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('我的评论', style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(
+                      commentCount == 0 ? '还没有评论，快去发表吧～' : '共 $commentCount 条评论',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.ink.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppTheme.ink,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

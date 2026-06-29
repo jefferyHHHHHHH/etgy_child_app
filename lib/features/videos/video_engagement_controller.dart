@@ -103,7 +103,6 @@ final videoEngagementControllerProvider = NotifierProvider.family<
 class VideoEngagementController
     extends FamilyNotifier<VideoEngagementState, VideoEngagementArgs> {
   bool _refreshScheduled = false;
-  bool _metricsDirty = false;
   bool _refreshPending = false;
 
   @override
@@ -141,7 +140,7 @@ class VideoEngagementController
           .read(videoRepositoryProvider)
           .fetchVideoById(videoId: arg.videoId);
       final metrics = video.metrics;
-      if (metrics != null && !_metricsDirty) {
+      if (metrics != null) {
         state = state.copyWith(
           playCount: metrics.playCount,
           likeCount: metrics.likeCount,
@@ -153,9 +152,7 @@ class VideoEngagementController
 
       if (_refreshPending) {
         _refreshPending = false;
-        if (!_metricsDirty) {
-          await refreshFromServer();
-        }
+        await refreshFromServer();
       }
     }
   }
@@ -189,15 +186,13 @@ class VideoEngagementController
           .read(videoEngagementStoreProvider.notifier)
           .setLiked(videoId: arg.videoId, liked: nowLiked);
 
-      _metricsDirty = true;
-      state = state.copyWith(
-        liked: nowLiked,
-        likeCount: _adjustCount(
+      state = state.copyWith(liked: nowLiked, isLiking: false);
+      await _syncMetricsFromServer(
+        fallbackLikeCount: _adjustCount(
           current: state.likeCount,
           wasActive: wasLiked,
           nowActive: nowLiked,
         ),
-        isLiking: false,
       );
     } catch (_) {
       state = state.copyWith(isLiking: false);
@@ -221,19 +216,43 @@ class VideoEngagementController
           .read(videoEngagementStoreProvider.notifier)
           .setFavorited(videoId: arg.videoId, favorited: nowFavorited);
 
-      _metricsDirty = true;
-      state = state.copyWith(
-        favorited: nowFavorited,
-        favCount: _adjustCount(
+      state = state.copyWith(favorited: nowFavorited, isFavoriting: false);
+      await _syncMetricsFromServer(
+        fallbackFavCount: _adjustCount(
           current: state.favCount,
           wasActive: wasFavorited,
           nowActive: nowFavorited,
         ),
-        isFavoriting: false,
       );
     } catch (_) {
       state = state.copyWith(isFavoriting: false);
       rethrow;
+    }
+  }
+
+  Future<void> _syncMetricsFromServer({
+    int? fallbackLikeCount,
+    int? fallbackFavCount,
+  }) async {
+    try {
+      final video = await ref
+          .read(videoRepositoryProvider)
+          .fetchVideoById(videoId: arg.videoId);
+      final metrics = video.metrics;
+      if (metrics == null) return;
+
+      state = state.copyWith(
+        playCount: metrics.playCount,
+        likeCount: metrics.likeCount,
+        favCount: metrics.favCount,
+      );
+    } catch (_) {
+      if (fallbackLikeCount != null || fallbackFavCount != null) {
+        state = state.copyWith(
+          likeCount: fallbackLikeCount ?? state.likeCount,
+          favCount: fallbackFavCount ?? state.favCount,
+        );
+      }
     }
   }
 

@@ -18,6 +18,7 @@ import '../features/lives/pages/live_watch_page.dart';
 import '../features/notifications/pages/notifications_page.dart';
 import '../features/profile/pages/profile_page.dart';
 import '../features/settings/pages/settings_page.dart';
+import '../features/videos/pages/my_comments_page.dart';
 import '../features/videos/pages/video_detail_page.dart';
 import '../features/videos/pages/video_list_page.dart';
 import '../features/videos/pages/video_player_page.dart';
@@ -37,6 +38,7 @@ class AppRoutes {
   static const liveReplay = '/lives/replay';
 
   static const profile = '/profile';
+  static const myComments = '/profile/my-comments';
   static const favorites = '/favorites';
   static const learning = '/learning';
   static const settings = '/settings';
@@ -130,6 +132,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.myComments,
+        builder: (context, state) => const MyCommentsPage(),
       ),
       GoRoute(
         path: AppRoutes.favorites,

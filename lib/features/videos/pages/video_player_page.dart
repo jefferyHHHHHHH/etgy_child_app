@@ -9,10 +9,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../core/errors/app_exception_mapper.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/comment_author_display.dart';
+import '../../../core/utils/comment_content_validator.dart';
 import '../../../core/widgets/playful_background.dart';
 import '../../auth/auth_controller.dart';
 import '../data/video_repository.dart';
+import '../my_comments_store.dart';
 import '../video_comments_controller.dart';
 import '../video_engagement_controller.dart';
 
@@ -51,22 +55,33 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
       return;
     }
 
-    final resolvedUrl = await _resolvePlayableUrl(video);
-    if (resolvedUrl == null || resolvedUrl.trim().isEmpty) {
-      setState(() {
-        _errorMessage = '未获取到视频地址';
-      });
-      return;
-    }
+    try {
+      final resolvedUrl = await _resolvePlayableUrl(video);
+      if (resolvedUrl == null || resolvedUrl.trim().isEmpty) {
+        setState(() {
+          _errorMessage = '未获取到视频地址';
+        });
+        return;
+      }
 
-    final uri = _tryParseHttpUrl(resolvedUrl);
-    if (uri == null) {
-      setState(() {
-        _errorMessage = '视频地址格式不正确：$resolvedUrl';
-      });
-      return;
-    }
+      final uri = _tryParseHttpUrl(resolvedUrl);
+      if (uri == null) {
+        setState(() {
+          _errorMessage = '视频地址格式不正确';
+        });
+        return;
+      }
 
+      await _initPlayerWithUrl(uri);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = _formatPlaybackError(e);
+      });
+    }
+  }
+
+  Future<void> _initPlayerWithUrl(Uri uri) async {
     final token = ref.read(authControllerProvider).token?.trim();
     final isPresigned = _isPresignedS3Url(uri);
     final headers = <String, String>{
@@ -97,9 +112,21 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         .catchError((Object e) {
           if (!mounted) return;
           setState(() {
-            _errorMessage = e.toString();
+            _errorMessage = _formatPlaybackError(e);
           });
         });
+    if (mounted) setState(() {});
+  }
+
+  void _retryPlayer() {
+    _watchTimer?.cancel();
+    _controller?.dispose();
+    _controller = null;
+    _initializeFuture = null;
+    _errorMessage = null;
+    _playCountSynced = false;
+    setState(() {});
+    unawaited(_prepareAndInitPlayer());
   }
 
   Future<String?> _resolvePlayableUrl(Video video) async {
@@ -110,14 +137,32 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
       return rawUrl;
     }
 
-    final presigned = await ref
-        .read(videoRepositoryProvider)
-        .fetchVideoMediaUrl(videoId: video.id);
+    // 有直链时先快速尝试刷新预签名地址，避免弱网下等满 10s 连接超时。
+    final presignedTimeout = directUri != null
+        ? const Duration(seconds: 3)
+        : const Duration(seconds: 12);
+
+    final presigned = await _fetchPresignedUrl(video.id, presignedTimeout);
     if (presigned != null && presigned.trim().isNotEmpty) {
       return presigned.trim();
     }
 
     return rawUrl.isEmpty ? null : rawUrl;
+  }
+
+  Future<String?> _fetchPresignedUrl(int videoId, Duration timeout) async {
+    try {
+      return await ref
+          .read(videoRepositoryProvider)
+          .fetchVideoMediaUrl(videoId: videoId)
+          .timeout(timeout);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _formatPlaybackError(Object error) {
+    return AppExceptionMapper.from(error).message;
   }
 
   Uri? _tryParseHttpUrl(String raw) {
@@ -266,48 +311,39 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     final title = video?.title ?? '视频播放';
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
+    if (video == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: PlayfulBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                _errorMessage ?? '未获取到视频信息',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       resizeToAvoidBottomInset: true,
       body: PlayfulBackground(
-        child: _errorMessage != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    '播放失败：${_errorMessage!}',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-            : controller == null || _initializeFuture == null
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                children: [
-                  _PlayerCard(
-                    controller: controller,
-                    initializeFuture: _initializeFuture!,
-                    speed: _speed,
-                    onSpeedChanged: (value) async {
-                      setState(() => _speed = value);
-                      if (!controller.value.isInitialized) return;
-                      await controller.setPlaybackSpeed(value);
-                    },
-                    onFullscreen: () => _openFullscreen(context),
-                  ),
-                  if (video != null) ...[
-                    const SizedBox(height: 10),
-                    _EngagementBar(video: video),
-                    const SizedBox(height: 12),
-                    _CommentsSection(videoId: video.id),
-                  ],
-                ],
-              ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+          children: [
+            _buildPlayerArea(context, controller),
+            const SizedBox(height: 10),
+            _EngagementBar(video: video),
+            const SizedBox(height: 12),
+            _CommentsSection(videoId: video.id),
+          ],
+        ),
       ),
-      bottomNavigationBar: video == null
-          ? null
-          : AnimatedPadding(
+      bottomNavigationBar: AnimatedPadding(
               duration: const Duration(milliseconds: 160),
               curve: Curves.easeOut,
               padding: EdgeInsets.only(bottom: bottomInset),
@@ -319,10 +355,16 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                     controller: _commentController,
                     onSend: () async {
                       final text = _commentController.text.trim();
-                      if (text.isEmpty) return;
+                      final validation = CommentContentValidator.validate(text);
+                      if (!validation.isValid) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(validation.message!)),
+                        );
+                        return;
+                      }
 
                       try {
-                        await ref
+                        final comment = await ref
                             .read(
                               videoCommentsControllerProvider(
                                 video.id,
@@ -331,8 +373,20 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                             .post(text);
                         _commentController.clear();
                         if (!context.mounted) return;
+
+                        final message = switch (comment.status) {
+                          VideoCommentStatusEnum.APPROVED => '评论已发布 ✓',
+                          VideoCommentStatusEnum.REJECTED =>
+                            comment.rejectReason?.isNotEmpty == true
+                                ? '评论未通过：${comment.rejectReason}'
+                                : '评论未通过审核',
+                          VideoCommentStatusEnum.PENDING => '评论已提交，正在审核中 ✓',
+                        };
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('评论已提交（可能需要审核）')),
+                          SnackBar(
+                            content: Text(message),
+                            duration: const Duration(seconds: 3),
+                          ),
                         );
                       } catch (e) {
                         if (!context.mounted) return;
@@ -345,6 +399,47 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildPlayerArea(BuildContext context, VideoPlayerController? controller) {
+    final errorMessage = _errorMessage;
+    if (errorMessage != null) {
+      return _PlayerPlaceholderCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '播放失败：$errorMessage',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: _retryPlayer,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('重试'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (controller == null || _initializeFuture == null) {
+      return const _PlayerPlaceholderCard(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    return _PlayerCard(
+      controller: controller,
+      initializeFuture: _initializeFuture!,
+      speed: _speed,
+      onSpeedChanged: (value) async {
+        setState(() => _speed = value);
+        if (!controller.value.isInitialized) return;
+        await controller.setPlaybackSpeed(value);
+      },
+      onFullscreen: () => _openFullscreen(context),
     );
   }
 
@@ -385,6 +480,28 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         // Best-effort.
       }
     }
+  }
+}
+
+class _PlayerPlaceholderCard extends StatelessWidget {
+  const _PlayerPlaceholderCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -759,40 +876,92 @@ class _ActionChip extends StatelessWidget {
   }
 }
 
-class _CommentComposer extends StatelessWidget {
+class _CommentComposer extends StatefulWidget {
   const _CommentComposer({required this.controller, required this.onSend});
 
   final TextEditingController controller;
   final VoidCallback onSend;
 
   @override
+  State<_CommentComposer> createState() => _CommentComposerState();
+}
+
+class _CommentComposerState extends State<_CommentComposer> {
+  static const int _maxLength = 200;
+  int _charCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    final len = widget.controller.text.length;
+    if (len != _charCount) {
+      setState(() => _charCount = len);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final remaining = _maxLength - _charCount;
+    final showCounter = _charCount >= 150;
+    final isOverLimit = _charCount > _maxLength;
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSend(),
-                decoration: InputDecoration(
-                  hintText: '说点什么吧…',
-                  hintStyle: theme.textTheme.bodyMedium,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: widget.controller,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => widget.onSend(),
+                    maxLength: _maxLength,
+                    buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
+                        const SizedBox.shrink(),
+                    decoration: InputDecoration(
+                      hintText: '说点什么吧…',
+                      hintStyle: theme.textTheme.bodyMedium,
+                    ),
+                    minLines: 1,
+                    maxLines: 3,
+                  ),
                 ),
-                minLines: 1,
-                maxLines: 3,
+                const SizedBox(width: 10),
+                FilledButton(
+                  onPressed: isOverLimit ? null : widget.onSend,
+                  style: FilledButton.styleFrom(minimumSize: const Size(86, 44)),
+                  child: const Text('发布'),
+                ),
+              ],
+            ),
+            if (showCounter)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 4),
+                  child: Text(
+                    isOverLimit ? '超出 ${-remaining} 字' : '还可输入 $remaining 字',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isOverLimit ? AppTheme.coral : AppTheme.ink.withValues(alpha: 0.45),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton(
-              onPressed: onSend,
-              style: FilledButton.styleFrom(minimumSize: const Size(86, 44)),
-              child: const Text('发布'),
-            ),
           ],
         ),
       ),
@@ -808,7 +977,12 @@ class _CommentsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final comments = ref.watch(videoCommentsControllerProvider(videoId));
+    final commentsAsync = ref.watch(videoCommentsControllerProvider(videoId));
+    final myCommentsAll = ref.watch(myCommentsStoreProvider).comments;
+    final myComments = myCommentsAll
+        .where((c) => c.videoId == videoId)
+        .where((c) => c.status != VideoCommentStatusEnum.APPROVED)
+        .toList();
 
     return Card(
       child: Padding(
@@ -828,24 +1002,50 @@ class _CommentsSection extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            comments.when(
+            // ── 用户自己的评论（含待审核 / 未通过）──────────────────
+            if (myComments.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                '我的评论（审核中）',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: AppTheme.ink.withValues(alpha: 0.50),
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...myComments.map(
+                (c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _CommentTile(comment: c, showStatus: true),
+                ),
+              ),
+              const Divider(height: 20),
+            ],
+            // ── 公开评论（只展示 APPROVED）──────────────────────────
+            const SizedBox(height: 4),
+            commentsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text(e.toString()),
               data: (items) {
-                if (items.isEmpty) {
+                final approved = items
+                    .where((c) => c.status == VideoCommentStatusEnum.APPROVED)
+                    .toList();
+
+                if (approved.isEmpty && myComments.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.only(top: 8),
                     child: Text('还没有评论，来做第一个发言的人吧！'),
                   );
                 }
+                if (approved.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
                 return Column(
-                  children: items
+                  children: approved
                       .map(
                         (c) => Padding(
                           padding: const EdgeInsets.only(bottom: 10),
-                          child: _CommentTile(comment: c),
+                          child: _CommentTile(comment: c, showStatus: false),
                         ),
                       )
                       .toList(growable: false),
@@ -860,14 +1060,20 @@ class _CommentsSection extends ConsumerWidget {
 }
 
 class _CommentTile extends StatelessWidget {
-  const _CommentTile({required this.comment});
+  const _CommentTile({
+    required this.comment,
+    this.showStatus = false,
+  });
 
   final VideoComment comment;
+  final bool showStatus;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final status = comment.status;
+    final isRejected = status == VideoCommentStatusEnum.REJECTED;
+    final author = CommentAuthorDisplay.fromComment(comment);
 
     String statusText() {
       return switch (status) {
@@ -887,9 +1093,15 @@ class _CommentTile extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isRejected
+            ? AppTheme.coral.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.ink.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: isRejected
+              ? AppTheme.coral.withValues(alpha: 0.30)
+              : AppTheme.ink.withValues(alpha: 0.08),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -897,18 +1109,70 @@ class _CommentTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    '用户 ${comment.authorId}',
-                    style: theme.textTheme.titleMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              author.displayName,
+                              style: theme.textTheme.titleMedium,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (author.roleLabel != null) ...[
+                            const SizedBox(width: 8),
+                            _RolePill(label: author.roleLabel!),
+                          ],
+                        ],
+                      ),
+                      if (author.subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          author.subtitle!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppTheme.ink.withValues(alpha: 0.50),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                _StatusPill(text: statusText(), color: statusColor()),
+                if (showStatus)
+                  _StatusPill(text: statusText(), color: statusColor()),
               ],
             ),
             const SizedBox(height: 6),
             Text(comment.content, style: theme.textTheme.bodyMedium),
+            if (isRejected && (comment.rejectReason?.isNotEmpty ?? false)) ...[
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 14,
+                    color: AppTheme.coral.withValues(alpha: 0.80),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      '审核意见：${comment.rejectReason}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.coral.withValues(alpha: 0.80),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 8),
             Text(
               _formatDateTime(comment.createdAt),
@@ -939,6 +1203,32 @@ class _StatusPill extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Text(text),
+      ),
+    );
+  }
+}
+
+class _RolePill extends StatelessWidget {
+  const _RolePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppTheme.mint.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.ink.withValues(alpha: 0.65),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
