@@ -28,7 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  agora_rtm: 2.2.5
+  agora_rtc_engine: 6.5.4
+  agora_rtm: ^2.2.5
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
   etgy_openapi_client:
