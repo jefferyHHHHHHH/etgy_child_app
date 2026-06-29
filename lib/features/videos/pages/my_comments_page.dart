@@ -18,25 +18,53 @@ class MyCommentsPage extends ConsumerWidget {
       (list) => {for (final v in list) v.id: v.title},
     );
 
+    Future<void> onRefresh() =>
+        ref.read(myCommentsStoreProvider.notifier).refreshFromServer();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('我的评论')),
+      appBar: AppBar(
+        title: const Text('我的评论'),
+        actions: [
+          IconButton(
+            onPressed: state.isRefreshing ? null : onRefresh,
+            icon: state.isRefreshing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh_rounded),
+          ),
+        ],
+      ),
       body: !state.isLoaded
           ? const Center(child: CircularProgressIndicator())
-          : state.comments.isEmpty
-              ? _EmptyView()
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-                  itemCount: state.comments.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final comment = state.comments[index];
-                    final videoTitle = videoTitleMap.valueOrNull?[comment.videoId];
-                    return _MyCommentCard(
-                      comment: comment,
-                      videoTitle: videoTitle,
-                    );
-                  },
-                ),
+          : RefreshIndicator(
+              onRefresh: onRefresh,
+              child: state.comments.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 120),
+                        _EmptyView(),
+                      ],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                      itemCount: state.comments.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final comment = state.comments[index];
+                        final videoTitle =
+                            videoTitleMap.valueOrNull?[comment.videoId];
+                        return _MyCommentCard(
+                          comment: comment,
+                          videoTitle: videoTitle,
+                        );
+                      },
+                    ),
+            ),
     );
   }
 }

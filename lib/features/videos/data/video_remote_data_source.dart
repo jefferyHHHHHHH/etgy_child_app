@@ -2,6 +2,8 @@ import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/app_exception_mapper.dart';
+import '../../../core/network/api_envelope.dart';
 import '../../../core/network/generated_openapi_provider.dart';
 
 final videoRemoteDataSourceProvider = Provider<VideoRemoteDataSource>((
@@ -30,6 +32,12 @@ abstract class VideoRemoteDataSource {
     required int videoId,
     int page = 1,
     int pageSize = 20,
+  });
+
+  Future<List<VideoComment>> fetchMyComments({
+    int? videoId,
+    int page = 1,
+    int pageSize = 50,
   });
 
   Future<VideoComment> postComment({
@@ -131,6 +139,31 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
     }
 
     return data;
+  }
+
+  @override
+  Future<List<VideoComment>> fetchMyComments({
+    int? videoId,
+    int page = 1,
+    int pageSize = 50,
+  }) async {
+    try {
+      final response = await _client.dio.get<dynamic>(
+        '/api/videos/comments/mine',
+        queryParameters: <String, dynamic>{
+          'page': page,
+          'pageSize': pageSize,
+          if (videoId != null) 'videoId': videoId,
+        },
+      );
+
+      return ApiEnvelope.parseList(
+        json: response.data,
+        fromJson: VideoComment.fromJson,
+      );
+    } catch (error) {
+      throw AppExceptionMapper.from(error);
+    }
   }
 
   @override

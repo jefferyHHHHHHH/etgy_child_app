@@ -50,6 +50,18 @@ class VideoRepository {
     );
   }
 
+  Future<List<VideoComment>> fetchMyComments({
+    int? videoId,
+    int page = 1,
+    int pageSize = 50,
+  }) {
+    return remote.fetchMyComments(
+      videoId: videoId,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
   Future<VideoComment> postComment({
     required int videoId,
     required String content,

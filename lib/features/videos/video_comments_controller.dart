@@ -14,6 +14,8 @@ class VideoCommentsController extends AutoDisposeFamilyAsyncNotifier<List<VideoC
 
   @override
   Future<List<VideoComment>> build(int arg) async {
+    await ref.read(myCommentsStoreProvider.notifier).refreshForVideo(arg);
+
     final items = await ref.read(videoRepositoryProvider).fetchComments(
           videoId: arg,
           page: 1,
@@ -26,6 +28,8 @@ class VideoCommentsController extends AutoDisposeFamilyAsyncNotifier<List<VideoC
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
+      await ref.read(myCommentsStoreProvider.notifier).refreshForVideo(arg);
+
       final items = await ref.read(videoRepositoryProvider).fetchComments(
             videoId: arg,
             page: 1,

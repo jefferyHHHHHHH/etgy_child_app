@@ -1006,7 +1006,7 @@ class _CommentsSection extends ConsumerWidget {
             if (myComments.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
-                '我的评论（审核中）',
+                '我的评论',
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: AppTheme.ink.withValues(alpha: 0.50),
                 ),
