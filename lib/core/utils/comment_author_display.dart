@@ -83,6 +83,7 @@ class CommentAuthorDisplay {
   static String? _stringValue(Object? value) {
     if (value is! String) return null;
     final trimmed = value.trim();
-    return trimmed.isEmpty ? null : trimmed;
+    if (trimmed.isEmpty || trimmed == '未填写') return null;
+    return trimmed;
   }
 }
