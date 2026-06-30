@@ -31,4 +31,10 @@ class LiveRepository {
   Future<LiveRoom> fetchLiveDetail({required int id}) {
     return remote.fetchLiveDetail(id: id);
   }
+
+  Future<ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData> fetchAgoraRtcToken({
+    required int id,
+  }) {
+    return remote.fetchAgoraRtcToken(id: id);
+  }
 }

@@ -37,6 +37,18 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // agora_rtc_engine 与 agora_rtm 均包含 libaosl.so，需去重。
+    packaging {
+        jniLibs {
+            pickFirsts += listOf(
+                "lib/x86/libaosl.so",
+                "lib/x86_64/libaosl.so",
+                "lib/armeabi-v7a/libaosl.so",
+                "lib/arm64-v8a/libaosl.so",
+            )
+        }
+    }
 }
 
 flutter {

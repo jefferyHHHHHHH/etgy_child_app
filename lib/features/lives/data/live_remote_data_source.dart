@@ -2,6 +2,7 @@ import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/app_exception_mapper.dart';
 import '../../../core/network/generated_openapi_provider.dart';
 
 final liveRemoteDataSourceProvider = Provider<LiveRemoteDataSource>((Ref ref) {
@@ -18,6 +19,10 @@ abstract class LiveRemoteDataSource {
   });
 
   Future<LiveRoom> fetchLiveDetail({required int id});
+
+  Future<ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData> fetchAgoraRtcToken({
+    required int id,
+  });
 }
 
 class OpenApiLiveRemoteDataSource implements LiveRemoteDataSource {
@@ -33,39 +38,70 @@ class OpenApiLiveRemoteDataSource implements LiveRemoteDataSource {
     int? collegeId,
     String? search,
   }) async {
-    final trimmedSearch = search?.trim();
-    final response = await _client.getLiveApi().apiLiveGet(
-          tab: tab,
-          page: page,
-          pageSize: pageSize,
-          collegeId: collegeId,
-          search: (trimmedSearch == null || trimmedSearch.isEmpty)
-              ? null
-              : trimmedSearch,
+    try {
+      final trimmedSearch = search?.trim();
+      final response = await _client.getLiveApi().apiLiveGet(
+            tab: tab,
+            page: page,
+            pageSize: pageSize,
+            collegeId: collegeId,
+            search: (trimmedSearch == null || trimmedSearch.isEmpty)
+                ? null
+                : trimmedSearch,
+          );
+
+      final paged = response.data?.data;
+      if (paged == null) {
+        throw const AppException(
+          type: AppExceptionType.unknown,
+          message: '服务返回为空，请稍后重试',
         );
+      }
 
-    final paged = response.data?.data;
-    if (paged == null) {
-      throw const AppException(
-        type: AppExceptionType.unknown,
-        message: '服务返回为空，请稍后重试',
-      );
+      return paged.items;
+    } catch (error) {
+      throw AppExceptionMapper.from(error);
     }
-
-    return paged.items;
   }
 
   @override
   Future<LiveRoom> fetchLiveDetail({required int id}) async {
-    final response = await _client.getLiveApi().apiLiveIdGet(id: id.toString());
-    final data = response.data?.data;
-    if (data == null) {
-      throw const AppException(
-        type: AppExceptionType.unknown,
-        message: '服务返回为空，请稍后重试',
-      );
-    }
+    try {
+      final response =
+          await _client.getLiveApi().apiLiveIdGet(id: id.toString());
+      final data = response.data?.data;
+      if (data == null) {
+        throw const AppException(
+          type: AppExceptionType.unknown,
+          message: '服务返回为空，请稍后重试',
+        );
+      }
 
-    return data;
+      return data;
+    } catch (error) {
+      throw AppExceptionMapper.from(error);
+    }
+  }
+
+  @override
+  Future<ApiLiveIdAgoraRtcTokenPost200ResponseAllOfData> fetchAgoraRtcToken({
+    required int id,
+  }) async {
+    try {
+      final response = await _client
+          .getLiveApi()
+          .apiLiveIdAgoraRtcTokenPost(id: id.toString());
+      final data = response.data?.data;
+      if (data == null) {
+        throw const AppException(
+          type: AppExceptionType.unknown,
+          message: '获取直播凭证失败，请稍后重试',
+        );
+      }
+
+      return data;
+    } catch (error) {
+      throw AppExceptionMapper.from(error);
+    }
   }
 }

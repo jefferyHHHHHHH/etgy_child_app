@@ -123,7 +123,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.liveWatch,
-        builder: (context, state) => const LiveWatchPage(),
+        builder: (context, state) => LiveWatchPage(
+          live: state.extra is LiveRoom ? state.extra as LiveRoom : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.liveReplay,
