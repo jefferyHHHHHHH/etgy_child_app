@@ -15,16 +15,23 @@ class AgoraViewerService {
     required int uid,
     required void Function(int remoteUid) onRemoteUserJoined,
     required VoidCallback onRemoteUserLeft,
+    void Function(int remoteUid, int width, int height)? onFirstRemoteVideoFrame,
   }) async {
     final engine = createAgoraRtcEngine();
     await engine.initialize(RtcEngineContext(appId: appId));
     await engine.enableVideo();
+    await engine.enableAudio();
+    await engine.setDefaultAudioRouteToSpeakerphone(true);
     await engine.setClientRole(role: ClientRoleType.clientRoleAudience);
 
     engine.registerEventHandler(
       RtcEngineEventHandler(
-        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+        onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) async {
           _remoteUid = remoteUid;
+          await engine.setRemoteVideoStreamType(
+            uid: remoteUid,
+            streamType: VideoStreamType.videoStreamHigh,
+          );
           onRemoteUserJoined(remoteUid);
         },
         onUserOffline: (
@@ -36,6 +43,15 @@ class AgoraViewerService {
             _remoteUid = null;
           }
           onRemoteUserLeft();
+        },
+        onFirstRemoteVideoFrame: (
+          RtcConnection connection,
+          int remoteUid,
+          int width,
+          int height,
+          int elapsed,
+        ) {
+          onFirstRemoteVideoFrame?.call(remoteUid, width, height);
         },
       ),
     );
@@ -54,6 +70,12 @@ class AgoraViewerService {
 
     _engine = engine;
     return engine;
+  }
+
+  Future<void> setRemoteAudioMuted(bool muted) async {
+    final remoteUid = _remoteUid;
+    if (remoteUid == null) return;
+    await _engine?.muteRemoteAudioStream(uid: remoteUid, mute: muted);
   }
 
   Future<void> leave() async {

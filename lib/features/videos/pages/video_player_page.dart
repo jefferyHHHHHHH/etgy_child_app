@@ -59,7 +59,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
       final resolvedUrl = await _resolvePlayableUrl(video);
       if (resolvedUrl == null || resolvedUrl.trim().isEmpty) {
         setState(() {
-          _errorMessage = '未获取到视频地址';
+          _errorMessage = '视频地址已过期或获取失败，请稍后重试';
         });
         return;
       }
@@ -131,23 +131,28 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
 
   Future<String?> _resolvePlayableUrl(Video video) async {
     final rawUrl = video.url.trim();
-    final directUri = _tryParseHttpUrl(rawUrl);
 
-    if (directUri != null && _isPresignedS3Url(directUri)) {
-      return rawUrl;
-    }
-
-    // 有直链时先快速尝试刷新预签名地址，避免弱网下等满 10s 连接超时。
-    final presignedTimeout = directUri != null
-        ? const Duration(seconds: 3)
-        : const Duration(seconds: 12);
-
-    final presigned = await _fetchPresignedUrl(video.id, presignedTimeout);
+    // 列表接口返回的预签名 URL 有效期较短，播放时必须向服务端重新获取。
+    final presigned = await _fetchPresignedUrl(
+      video.id,
+      const Duration(seconds: 12),
+    );
     if (presigned != null && presigned.trim().isNotEmpty) {
       return presigned.trim();
     }
 
-    return rawUrl.isEmpty ? null : rawUrl;
+    if (rawUrl.isEmpty) {
+      return null;
+    }
+
+    final directUri = _tryParseHttpUrl(rawUrl);
+    if (directUri != null &&
+        _isPresignedS3Url(directUri) &&
+        _isPresignedUrlExpired(directUri)) {
+      return null;
+    }
+
+    return rawUrl;
   }
 
   Future<String?> _fetchPresignedUrl(int videoId, Duration timeout) async {
@@ -220,6 +225,28 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     return qp.containsKey('X-Amz-Signature') ||
         qp.containsKey('X-Amz-Credential') ||
         qp.containsKey('X-Amz-Algorithm');
+  }
+
+  static bool _isPresignedUrlExpired(Uri uri) {
+    final qp = uri.queryParameters;
+    final dateStr = qp['X-Amz-Date'];
+    final expiresStr = qp['X-Amz-Expires'];
+    if (dateStr == null || expiresStr == null) {
+      return false;
+    }
+
+    try {
+      final issuedAt = DateTime.parse(
+        '${dateStr.substring(0, 8)}T'
+        '${dateStr.substring(9, 15)}Z',
+      );
+      final expiresSec = int.parse(expiresStr);
+      return DateTime.now().toUtc().isAfter(
+        issuedAt.add(Duration(seconds: expiresSec)),
+      );
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<String> _readResponseSnippet(
