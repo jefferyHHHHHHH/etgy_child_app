@@ -3,6 +3,10 @@ README.md
 analysis_options.yaml
 build.yaml
 doc/AIApi.md
+doc/AdminVideoCommentItem.md
+doc/AdminVideoCommentPagedResult.md
+doc/AdminVideoCommentVideo.md
+doc/AdminVideoCommentVideoCollege.md
 doc/AdminVideoItem.md
 doc/AdminVideoPagedResult.md
 doc/ApiAiRiskAlertsGet200Response.md
@@ -78,8 +82,10 @@ doc/ApiUsersVolunteersIdPasswordPostRequest.md
 doc/ApiUsersVolunteersIdStatusPatchRequest.md
 doc/ApiUsersVolunteersIdSuspendPatchRequest.md
 doc/ApiVideosAdminGet200Response.md
-doc/ApiVideosAuditBatchPostRequest.md
+doc/ApiVideosCommentsAdminGet200Response.md
+doc/ApiVideosCommentsAuditBatchPostRequest.md
 doc/ApiVideosCommentsCommentIdAuditPostRequest.md
+doc/ApiVideosCommentsCommentIdDelete200Response.md
 doc/ApiVideosGet200Response.md
 doc/ApiVideosIdCommentsGet200Response.md
 doc/ApiVideosIdCommentsPost201Response.md
@@ -95,6 +101,7 @@ doc/ApiVideosWatchLogsGet200ResponseAllOfData.md
 doc/AuthApi.md
 doc/BaseResponse.md
 doc/ChildrenApi.md
+doc/DeleteResult.md
 doc/Dictionaries.md
 doc/DictionaryItem.md
 doc/ErrorResponse.md
@@ -130,6 +137,10 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/deserialize.dart
+lib/src/model/admin_video_comment_item.dart
+lib/src/model/admin_video_comment_paged_result.dart
+lib/src/model/admin_video_comment_video.dart
+lib/src/model/admin_video_comment_video_college.dart
 lib/src/model/admin_video_item.dart
 lib/src/model/admin_video_paged_result.dart
 lib/src/model/api_ai_risk_alerts_get200_response.dart
@@ -205,8 +216,10 @@ lib/src/model/api_users_volunteers_id_password_post_request.dart
 lib/src/model/api_users_volunteers_id_status_patch_request.dart
 lib/src/model/api_users_volunteers_id_suspend_patch_request.dart
 lib/src/model/api_videos_admin_get200_response.dart
-lib/src/model/api_videos_audit_batch_post_request.dart
+lib/src/model/api_videos_comments_admin_get200_response.dart
+lib/src/model/api_videos_comments_audit_batch_post_request.dart
 lib/src/model/api_videos_comments_comment_id_audit_post_request.dart
+lib/src/model/api_videos_comments_comment_id_delete200_response.dart
 lib/src/model/api_videos_get200_response.dart
 lib/src/model/api_videos_id_comments_get200_response.dart
 lib/src/model/api_videos_id_comments_post201_response.dart
@@ -220,6 +233,7 @@ lib/src/model/api_videos_post_request.dart
 lib/src/model/api_videos_watch_logs_get200_response.dart
 lib/src/model/api_videos_watch_logs_get200_response_all_of_data.dart
 lib/src/model/base_response.dart
+lib/src/model/delete_result.dart
 lib/src/model/dictionaries.dart
 lib/src/model/dictionary_item.dart
 lib/src/model/error_response.dart
@@ -233,7 +247,11 @@ lib/src/model/video_media_urls.dart
 lib/src/model/video_metrics.dart
 lib/src/model/video_watch_log.dart
 pubspec.yaml
-test/admin_video_item_test.dart
-test/admin_video_paged_result_test.dart
-test/api_videos_admin_get200_response_test.dart
-test/video_media_urls_test.dart
+test/admin_video_comment_item_test.dart
+test/admin_video_comment_paged_result_test.dart
+test/admin_video_comment_video_college_test.dart
+test/admin_video_comment_video_test.dart
+test/api_videos_comments_admin_get200_response_test.dart
+test/api_videos_comments_audit_batch_post_request_test.dart
+test/api_videos_comments_comment_id_delete200_response_test.dart
+test/delete_result_test.dart

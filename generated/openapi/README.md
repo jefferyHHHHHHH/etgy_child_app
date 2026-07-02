@@ -65,7 +65,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://8.166.115.78*
+All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -143,7 +143,11 @@ Class | Method | HTTP request | Description
 [*UsersApi*](doc/UsersApi.md) | [**apiUsersVolunteersIdSuspendPatch**](doc/UsersApi.md#apiusersvolunteersidsuspendpatch) | **PATCH** /api/users/volunteers/{id}/suspend | 停用/启用志愿者账号（管理员）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosAdminGet**](doc/VideosApi.md#apivideosadminget) | **GET** /api/videos/admin | 管理端视频列表（学院/平台管理员）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosAuditBatchPost**](doc/VideosApi.md#apivideosauditbatchpost) | **POST** /api/videos/audit/batch | 批量审核视频（学院管理员）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosCommentsAdminGet**](doc/VideosApi.md#apivideoscommentsadminget) | **GET** /api/videos/comments/admin | 管理端评论审核列表（学院/平台管理员）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosCommentsAuditBatchPost**](doc/VideosApi.md#apivideoscommentsauditbatchpost) | **POST** /api/videos/comments/audit/batch | 批量审核评论（学院/平台管理员）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosCommentsCommentIdAuditPost**](doc/VideosApi.md#apivideoscommentscommentidauditpost) | **POST** /api/videos/comments/{commentId}/audit | 审核评论（管理员）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosCommentsCommentIdDelete**](doc/VideosApi.md#apivideoscommentscommentiddelete) | **DELETE** /api/videos/comments/{commentId} | 删除评论（管理员、视频上传者或评论作者）
+[*VideosApi*](doc/VideosApi.md) | [**apiVideosCommentsMineGet**](doc/VideosApi.md#apivideoscommentsmineget) | **GET** /api/videos/comments/mine | 获取我的评论列表（含待审核/未通过/已通过）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosGet**](doc/VideosApi.md#apivideosget) | **GET** /api/videos | 获取视频列表（公开）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosIdAuditPost**](doc/VideosApi.md#apivideosidauditpost) | **POST** /api/videos/{id}/audit | 审核视频（学院管理员）
 [*VideosApi*](doc/VideosApi.md) | [**apiVideosIdCommentsGet**](doc/VideosApi.md#apivideosidcommentsget) | **GET** /api/videos/{id}/comments | 获取视频评论列表（公开：仅已通过）
@@ -168,6 +172,10 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AdminVideoCommentItem](doc/AdminVideoCommentItem.md)
+ - [AdminVideoCommentPagedResult](doc/AdminVideoCommentPagedResult.md)
+ - [AdminVideoCommentVideo](doc/AdminVideoCommentVideo.md)
+ - [AdminVideoCommentVideoCollege](doc/AdminVideoCommentVideoCollege.md)
  - [AdminVideoItem](doc/AdminVideoItem.md)
  - [AdminVideoPagedResult](doc/AdminVideoPagedResult.md)
  - [ApiAiRiskAlertsGet200Response](doc/ApiAiRiskAlertsGet200Response.md)
@@ -243,8 +251,10 @@ Class | Method | HTTP request | Description
  - [ApiUsersVolunteersIdStatusPatchRequest](doc/ApiUsersVolunteersIdStatusPatchRequest.md)
  - [ApiUsersVolunteersIdSuspendPatchRequest](doc/ApiUsersVolunteersIdSuspendPatchRequest.md)
  - [ApiVideosAdminGet200Response](doc/ApiVideosAdminGet200Response.md)
- - [ApiVideosAuditBatchPostRequest](doc/ApiVideosAuditBatchPostRequest.md)
+ - [ApiVideosCommentsAdminGet200Response](doc/ApiVideosCommentsAdminGet200Response.md)
+ - [ApiVideosCommentsAuditBatchPostRequest](doc/ApiVideosCommentsAuditBatchPostRequest.md)
  - [ApiVideosCommentsCommentIdAuditPostRequest](doc/ApiVideosCommentsCommentIdAuditPostRequest.md)
+ - [ApiVideosCommentsCommentIdDelete200Response](doc/ApiVideosCommentsCommentIdDelete200Response.md)
  - [ApiVideosGet200Response](doc/ApiVideosGet200Response.md)
  - [ApiVideosIdCommentsGet200Response](doc/ApiVideosIdCommentsGet200Response.md)
  - [ApiVideosIdCommentsPost201Response](doc/ApiVideosIdCommentsPost201Response.md)
@@ -258,6 +268,7 @@ Class | Method | HTTP request | Description
  - [ApiVideosWatchLogsGet200Response](doc/ApiVideosWatchLogsGet200Response.md)
  - [ApiVideosWatchLogsGet200ResponseAllOfData](doc/ApiVideosWatchLogsGet200ResponseAllOfData.md)
  - [BaseResponse](doc/BaseResponse.md)
+ - [DeleteResult](doc/DeleteResult.md)
  - [Dictionaries](doc/Dictionaries.md)
  - [DictionaryItem](doc/DictionaryItem.md)
  - [ErrorResponse](doc/ErrorResponse.md)

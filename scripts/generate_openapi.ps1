@@ -31,14 +31,35 @@ if (-not (Test-Path $resolvedSpecPath)) {
 
 openapi-generator-cli generate -c openapi-generator-config.yaml -i $resolvedSpecPath -o $resolvedOutputDir
 
+# The dart-dio generator emits json_serializable/copy_with part files via
+# build_runner. Keep the generated package language level aligned with current
+# generated code before running builders.
+$generatedPubspec = Join-Path $resolvedOutputDir "pubspec.yaml"
+if (Test-Path $generatedPubspec) {
+  $pubspecContent = Get-Content $generatedPubspec -Raw
+  $pubspecContent = $pubspecContent -replace "sdk:\s*'>=3\.5\.0 <4\.0\.0'", "sdk: '>=3.8.0 <4.0.0'"
+  Set-Content -Path $generatedPubspec -Value $pubspecContent -Encoding UTF8 -NoNewline
+}
+
 # openapi-generator dart-dio emits invalid enum default constructors for some schemas.
 Get-ChildItem -Path $resolvedOutputDir -Recurse -Filter "*.dart" | ForEach-Object {
   $content = Get-Content $_.FullName -Raw
   $patched = $content -replace "const (\w+Enum)\._\('(\w+)'\)", '$1.$2'
+  $patched = $patched -replace "defaultValue: 'study',(\s*name: r'mode',)", 'defaultValue: ApiAiTutorChatPostRequestModeEnum.study,$1'
+  $patched = $patched -replace "\?\?\s*'study',", '?? ApiAiTutorChatPostRequestModeEnum.study,'
   if ($patched -ne $content) {
     Set-Content -Path $_.FullName -Value $patched -Encoding UTF8 -NoNewline
     Write-Host "Patched enum default in: $($_.FullName)"
   }
+}
+
+Push-Location $resolvedOutputDir
+try {
+  dart pub get
+  dart run build_runner build --delete-conflicting-outputs
+}
+finally {
+  Pop-Location
 }
 
 Write-Host "OpenAPI client generated at: $resolvedOutputDir"

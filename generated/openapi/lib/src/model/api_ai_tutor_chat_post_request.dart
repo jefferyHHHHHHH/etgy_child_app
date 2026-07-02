@@ -1,4 +1,4 @@
-//
+﻿//
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
@@ -28,7 +28,7 @@ class ApiAiTutorChatPostRequest {
   });
 
   @JsonKey(
-    defaultValue: 'study',
+    defaultValue: ApiAiTutorChatPostRequestModeEnum.study,
     name: r'mode',
     required: false,
     includeIfNull: false,

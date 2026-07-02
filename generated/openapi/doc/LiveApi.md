@@ -5,7 +5,7 @@
 import 'package:etgy_openapi_client/api.dart';
 ```
 
-All URIs are relative to *http://8.166.115.78*
+All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -285,7 +285,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

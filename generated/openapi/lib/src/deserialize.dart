@@ -1,3 +1,7 @@
+import 'package:etgy_openapi_client/src/model/admin_video_comment_item.dart';
+import 'package:etgy_openapi_client/src/model/admin_video_comment_paged_result.dart';
+import 'package:etgy_openapi_client/src/model/admin_video_comment_video.dart';
+import 'package:etgy_openapi_client/src/model/admin_video_comment_video_college.dart';
 import 'package:etgy_openapi_client/src/model/admin_video_item.dart';
 import 'package:etgy_openapi_client/src/model/admin_video_paged_result.dart';
 import 'package:etgy_openapi_client/src/model/api_ai_risk_alerts_get200_response.dart';
@@ -73,8 +77,10 @@ import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_password_p
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_status_patch_request.dart';
 import 'package:etgy_openapi_client/src/model/api_users_volunteers_id_suspend_patch_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_admin_get200_response.dart';
-import 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_admin_get200_response.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_audit_batch_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_delete200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_id_comments_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_id_comments_post201_response.dart';
@@ -88,6 +94,7 @@ import 'package:etgy_openapi_client/src/model/api_videos_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_watch_logs_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_watch_logs_get200_response_all_of_data.dart';
 import 'package:etgy_openapi_client/src/model/base_response.dart';
+import 'package:etgy_openapi_client/src/model/delete_result.dart';
 import 'package:etgy_openapi_client/src/model/dictionaries.dart';
 import 'package:etgy_openapi_client/src/model/dictionary_item.dart';
 import 'package:etgy_openapi_client/src/model/error_response.dart';
@@ -119,6 +126,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (valueString == 'true' || valueString == '1') as ReturnType;
         case 'double':
           return (value is double ? value : double.parse('$value')) as ReturnType;
+        case 'AdminVideoCommentItem':
+          return AdminVideoCommentItem.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminVideoCommentPagedResult':
+          return AdminVideoCommentPagedResult.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminVideoCommentVideo':
+          return AdminVideoCommentVideo.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminVideoCommentVideoCollege':
+          return AdminVideoCommentVideoCollege.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AdminVideoItem':
           return AdminVideoItem.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AdminVideoPagedResult':
@@ -269,10 +284,14 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiUsersVolunteersIdSuspendPatchRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosAdminGet200Response':
           return ApiVideosAdminGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'ApiVideosAuditBatchPostRequest':
-          return ApiVideosAuditBatchPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiVideosCommentsAdminGet200Response':
+          return ApiVideosCommentsAdminGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiVideosCommentsAuditBatchPostRequest':
+          return ApiVideosCommentsAuditBatchPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosCommentsCommentIdAuditPostRequest':
           return ApiVideosCommentsCommentIdAuditPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ApiVideosCommentsCommentIdDelete200Response':
+          return ApiVideosCommentsCommentIdDelete200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosGet200Response':
           return ApiVideosGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ApiVideosIdCommentsGet200Response':
@@ -299,6 +318,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ApiVideosWatchLogsGet200ResponseAllOfData.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BaseResponse':
           return BaseResponse.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DeleteResult':
+          return DeleteResult.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Dictionaries':
           return Dictionaries.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DictionaryItem':

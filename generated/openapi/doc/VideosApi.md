@@ -5,13 +5,17 @@
 import 'package:etgy_openapi_client/api.dart';
 ```
 
-All URIs are relative to *http://8.166.115.78*
+All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**apiVideosAdminGet**](VideosApi.md#apivideosadminget) | **GET** /api/videos/admin | 管理端视频列表（学院/平台管理员）
 [**apiVideosAuditBatchPost**](VideosApi.md#apivideosauditbatchpost) | **POST** /api/videos/audit/batch | 批量审核视频（学院管理员）
+[**apiVideosCommentsAdminGet**](VideosApi.md#apivideoscommentsadminget) | **GET** /api/videos/comments/admin | 管理端评论审核列表（学院/平台管理员）
+[**apiVideosCommentsAuditBatchPost**](VideosApi.md#apivideoscommentsauditbatchpost) | **POST** /api/videos/comments/audit/batch | 批量审核评论（学院/平台管理员）
 [**apiVideosCommentsCommentIdAuditPost**](VideosApi.md#apivideoscommentscommentidauditpost) | **POST** /api/videos/comments/{commentId}/audit | 审核评论（管理员）
+[**apiVideosCommentsCommentIdDelete**](VideosApi.md#apivideoscommentscommentiddelete) | **DELETE** /api/videos/comments/{commentId} | 删除评论（管理员、视频上传者或评论作者）
+[**apiVideosCommentsMineGet**](VideosApi.md#apivideoscommentsmineget) | **GET** /api/videos/comments/mine | 获取我的评论列表（含待审核/未通过/已通过）
 [**apiVideosGet**](VideosApi.md#apivideosget) | **GET** /api/videos | 获取视频列表（公开）
 [**apiVideosIdAuditPost**](VideosApi.md#apivideosidauditpost) | **POST** /api/videos/{id}/audit | 审核视频（学院管理员）
 [**apiVideosIdCommentsGet**](VideosApi.md#apivideosidcommentsget) | **GET** /api/videos/{id}/comments | 获取视频评论列表（公开：仅已通过）
@@ -94,7 +98,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **apiVideosAuditBatchPost**
-> ApiAuthRegisterPost201Response apiVideosAuditBatchPost(apiVideosAuditBatchPostRequest)
+> ApiAuthRegisterPost201Response apiVideosAuditBatchPost(apiVideosCommentsAuditBatchPostRequest)
 
 批量审核视频（学院管理员）
 
@@ -103,10 +107,10 @@ Name | Type | Description  | Notes
 import 'package:etgy_openapi_client/api.dart';
 
 final api = EtgyOpenapiClient().getVideosApi();
-final ApiVideosAuditBatchPostRequest apiVideosAuditBatchPostRequest = ; // ApiVideosAuditBatchPostRequest | 
+final ApiVideosCommentsAuditBatchPostRequest apiVideosCommentsAuditBatchPostRequest = ; // ApiVideosCommentsAuditBatchPostRequest | 
 
 try {
-    final response = api.apiVideosAuditBatchPost(apiVideosAuditBatchPostRequest);
+    final response = api.apiVideosAuditBatchPost(apiVideosCommentsAuditBatchPostRequest);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling VideosApi->apiVideosAuditBatchPost: $e\n');
@@ -117,7 +121,101 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **apiVideosAuditBatchPostRequest** | [**ApiVideosAuditBatchPostRequest**](ApiVideosAuditBatchPostRequest.md)|  | [optional] 
+ **apiVideosCommentsAuditBatchPostRequest** | [**ApiVideosCommentsAuditBatchPostRequest**](ApiVideosCommentsAuditBatchPostRequest.md)|  | [optional] 
+
+### Return type
+
+[**ApiAuthRegisterPost201Response**](ApiAuthRegisterPost201Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosCommentsAdminGet**
+> ApiVideosCommentsAdminGet200Response apiVideosCommentsAdminGet(status, collegeId, videoId, search, page, pageSize)
+
+管理端评论审核列表（学院/平台管理员）
+
+跨视频聚合的评论审核队列。学院管理员默认仅本学院视频下的评论；平台管理员可全局查看并按 collegeId 筛选。默认 status=PENDING。
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final String status = status_example; // String | 默认 PENDING（待审核队列）
+final int collegeId = 56; // int | 平台管理员可按学院筛选
+final int videoId = 56; // int | 
+final String search = search_example; // String | 搜索评论内容或视频标题
+final int page = 56; // int | 
+final int pageSize = 56; // int | 
+
+try {
+    final response = api.apiVideosCommentsAdminGet(status, collegeId, videoId, search, page, pageSize);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosCommentsAdminGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **status** | **String**| 默认 PENDING（待审核队列） | [optional] 
+ **collegeId** | **int**| 平台管理员可按学院筛选 | [optional] 
+ **videoId** | **int**|  | [optional] 
+ **search** | **String**| 搜索评论内容或视频标题 | [optional] 
+ **page** | **int**|  | [optional] [default to 1]
+ **pageSize** | **int**|  | [optional] [default to 20]
+
+### Return type
+
+[**ApiVideosCommentsAdminGet200Response**](ApiVideosCommentsAdminGet200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosCommentsAuditBatchPost**
+> ApiAuthRegisterPost201Response apiVideosCommentsAuditBatchPost(apiVideosCommentsAuditBatchPostRequest)
+
+批量审核评论（学院/平台管理员）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final ApiVideosCommentsAuditBatchPostRequest apiVideosCommentsAuditBatchPostRequest = ; // ApiVideosCommentsAuditBatchPostRequest | 
+
+try {
+    final response = api.apiVideosCommentsAuditBatchPost(apiVideosCommentsAuditBatchPostRequest);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosCommentsAuditBatchPost: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **apiVideosCommentsAuditBatchPostRequest** | [**ApiVideosCommentsAuditBatchPostRequest**](ApiVideosCommentsAuditBatchPostRequest.md)|  | [optional] 
 
 ### Return type
 
@@ -173,6 +271,94 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosCommentsCommentIdDelete**
+> ApiVideosCommentsCommentIdDelete200Response apiVideosCommentsCommentIdDelete(commentId)
+
+删除评论（管理员、视频上传者或评论作者）
+
+学院/平台管理员可删除管辖范围内任意评论；志愿者可删除自己上传视频下的任意评论；儿童等登录用户仅可删除自己发表的评论。
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final String commentId = commentId_example; // String | 
+
+try {
+    final response = api.apiVideosCommentsCommentIdDelete(commentId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosCommentsCommentIdDelete: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **commentId** | **String**|  | 
+
+### Return type
+
+[**ApiVideosCommentsCommentIdDelete200Response**](ApiVideosCommentsCommentIdDelete200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **apiVideosCommentsMineGet**
+> ApiVideosIdCommentsGet200Response apiVideosCommentsMineGet(videoId, page, pageSize)
+
+获取我的评论列表（含待审核/未通过/已通过）
+
+### Example
+```dart
+import 'package:etgy_openapi_client/api.dart';
+
+final api = EtgyOpenapiClient().getVideosApi();
+final int videoId = 56; // int | 按视频筛选我的评论
+final int page = 56; // int | 
+final int pageSize = 56; // int | 
+
+try {
+    final response = api.apiVideosCommentsMineGet(videoId, page, pageSize);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling VideosApi->apiVideosCommentsMineGet: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **videoId** | **int**| 按视频筛选我的评论 | [optional] 
+ **page** | **int**|  | [optional] [default to 1]
+ **pageSize** | **int**|  | [optional] [default to 20]
+
+### Return type
+
+[**ApiVideosIdCommentsGet200Response**](ApiVideosIdCommentsGet200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

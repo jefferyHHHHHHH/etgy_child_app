@@ -11,8 +11,10 @@ import 'package:dio/dio.dart';
 
 import 'package:etgy_openapi_client/src/model/api_auth_register_post201_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_admin_get200_response.dart';
-import 'package:etgy_openapi_client/src/model/api_videos_audit_batch_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_admin_get200_response.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_audit_batch_post_request.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_audit_post_request.dart';
+import 'package:etgy_openapi_client/src/model/api_videos_comments_comment_id_delete200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_id_comments_get200_response.dart';
 import 'package:etgy_openapi_client/src/model/api_videos_id_comments_post201_response.dart';
@@ -144,7 +146,7 @@ _responseData = rawData == null ? null : deserialize<ApiVideosAdminGet200Respons
   /// 
   ///
   /// Parameters:
-  /// * [apiVideosAuditBatchPostRequest] 
+  /// * [apiVideosCommentsAuditBatchPostRequest] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -155,7 +157,7 @@ _responseData = rawData == null ? null : deserialize<ApiVideosAdminGet200Respons
   /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<ApiAuthRegisterPost201Response>> apiVideosAuditBatchPost({ 
-    ApiVideosAuditBatchPostRequest? apiVideosAuditBatchPostRequest,
+    ApiVideosCommentsAuditBatchPostRequest? apiVideosCommentsAuditBatchPostRequest,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -186,7 +188,201 @@ _responseData = rawData == null ? null : deserialize<ApiVideosAdminGet200Respons
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(apiVideosAuditBatchPostRequest);
+_bodyData=jsonEncode(apiVideosCommentsAuditBatchPostRequest);
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ApiAuthRegisterPost201Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ApiAuthRegisterPost201Response, ApiAuthRegisterPost201Response>(rawData, 'ApiAuthRegisterPost201Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ApiAuthRegisterPost201Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// 管理端评论审核列表（学院/平台管理员）
+  /// 跨视频聚合的评论审核队列。学院管理员默认仅本学院视频下的评论；平台管理员可全局查看并按 collegeId 筛选。默认 status&#x3D;PENDING。
+  ///
+  /// Parameters:
+  /// * [status] - 默认 PENDING（待审核队列）
+  /// * [collegeId] - 平台管理员可按学院筛选
+  /// * [videoId] 
+  /// * [search] - 搜索评论内容或视频标题
+  /// * [page] 
+  /// * [pageSize] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ApiVideosCommentsAdminGet200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ApiVideosCommentsAdminGet200Response>> apiVideosCommentsAdminGet({ 
+    String? status,
+    int? collegeId,
+    int? videoId,
+    String? search,
+    int? page = 1,
+    int? pageSize = 20,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/videos/comments/admin';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (status != null) r'status': status,
+      if (collegeId != null) r'collegeId': collegeId,
+      if (videoId != null) r'videoId': videoId,
+      if (search != null) r'search': search,
+      if (page != null) r'page': page,
+      if (pageSize != null) r'pageSize': pageSize,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ApiVideosCommentsAdminGet200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ApiVideosCommentsAdminGet200Response, ApiVideosCommentsAdminGet200Response>(rawData, 'ApiVideosCommentsAdminGet200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ApiVideosCommentsAdminGet200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// 批量审核评论（学院/平台管理员）
+  /// 
+  ///
+  /// Parameters:
+  /// * [apiVideosCommentsAuditBatchPostRequest] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ApiAuthRegisterPost201Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ApiAuthRegisterPost201Response>> apiVideosCommentsAuditBatchPost({ 
+    ApiVideosCommentsAuditBatchPostRequest? apiVideosCommentsAuditBatchPostRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/videos/comments/audit/batch';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+_bodyData=jsonEncode(apiVideosCommentsAuditBatchPostRequest);
     } catch(error, stackTrace) {
       throw DioException(
          requestOptions: _options.compose(
@@ -323,6 +519,173 @@ _responseData = rawData == null ? null : deserialize<ApiVideosIdCommentsPost201R
     }
 
     return Response<ApiVideosIdCommentsPost201Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// 删除评论（管理员、视频上传者或评论作者）
+  /// 学院/平台管理员可删除管辖范围内任意评论；志愿者可删除自己上传视频下的任意评论；儿童等登录用户仅可删除自己发表的评论。
+  ///
+  /// Parameters:
+  /// * [commentId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ApiVideosCommentsCommentIdDelete200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ApiVideosCommentsCommentIdDelete200Response>> apiVideosCommentsCommentIdDelete({ 
+    required String commentId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/videos/comments/{commentId}'.replaceAll('{' r'commentId' '}', commentId.toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ApiVideosCommentsCommentIdDelete200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ApiVideosCommentsCommentIdDelete200Response, ApiVideosCommentsCommentIdDelete200Response>(rawData, 'ApiVideosCommentsCommentIdDelete200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ApiVideosCommentsCommentIdDelete200Response>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// 获取我的评论列表（含待审核/未通过/已通过）
+  /// 
+  ///
+  /// Parameters:
+  /// * [videoId] - 按视频筛选我的评论
+  /// * [page] 
+  /// * [pageSize] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ApiVideosIdCommentsGet200Response] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ApiVideosIdCommentsGet200Response>> apiVideosCommentsMineGet({ 
+    int? videoId,
+    int? page = 1,
+    int? pageSize = 20,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/api/videos/comments/mine';
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _queryParameters = <String, dynamic>{
+      if (videoId != null) r'videoId': videoId,
+      if (page != null) r'page': page,
+      if (pageSize != null) r'pageSize': pageSize,
+    };
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      queryParameters: _queryParameters,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ApiVideosIdCommentsGet200Response? _responseData;
+
+    try {
+final rawData = _response.data;
+_responseData = rawData == null ? null : deserialize<ApiVideosIdCommentsGet200Response, ApiVideosIdCommentsGet200Response>(rawData, 'ApiVideosIdCommentsGet200Response', growable: true);
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ApiVideosIdCommentsGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
