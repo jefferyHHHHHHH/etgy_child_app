@@ -1,11 +1,13 @@
-import 'package:etgy_openapi_client/etgy_openapi_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
 import '../../../core/errors/app_exception_mapper.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/playful_background.dart';
 import '../live_controller.dart';
+import '../widgets/live_room_card.dart';
 
 class LiveListPage extends ConsumerStatefulWidget {
   const LiveListPage({super.key});
@@ -19,6 +21,7 @@ class _LiveListPageState extends ConsumerState<LiveListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final lives = ref.watch(liveListControllerProvider(_tab));
 
     return Scaffold(
@@ -28,95 +31,142 @@ class _LiveListPageState extends ConsumerState<LiveListPage> {
           IconButton(
             onPressed: () =>
                 ref.read(liveListControllerProvider(_tab).notifier).refresh(),
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: SegmentedButton<LiveTab>(
-              segments: const [
-                ButtonSegment(
-                  value: LiveTab.living,
-                  label: Text('直播中'),
-                ),
-                ButtonSegment(
-                  value: LiveTab.upcoming,
-                  label: Text('即将开始'),
-                ),
-                ButtonSegment(
-                  value: LiveTab.ended,
-                  label: Text('已结束'),
-                ),
-              ],
-              selected: {_tab},
-              onSelectionChanged: (selection) {
-                setState(() => _tab = selection.first);
-              },
-            ),
-          ),
-          Expanded(
-            child: lives.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Text(AppExceptionMapper.from(error).message),
+      body: PlayfulBackground(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('精彩直播课堂', style: theme.textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                    '和老师一起互动学习，不错过每一场成长时刻。',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.ink.withValues(alpha: 0.72),
+                    ),
+                  ),
+                ],
               ),
-              data: (items) {
-                if (items.isEmpty) {
-                  return const Center(child: Text('暂无直播'));
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final live = items[index];
-                    final canWatch = live.status == LiveRoomStatusEnum.LIVING ||
-                        live.status == LiveRoomStatusEnum.PUBLISHED;
-
-                    return Card(
-                      child: ListTile(
-                        title: Text(live.title),
-                        subtitle: Text(_statusLabel(live.status)),
-                        trailing: canWatch
-                            ? const Icon(Icons.play_circle_outline)
-                            : null,
-                        onTap: canWatch
-                            ? () => context.push(AppRoutes.liveWatch, extra: live)
-                            : null,
-                      ),
-                    );
-                  },
-                );
-              },
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: SegmentedButton<LiveTab>(
+                segments: const [
+                  ButtonSegment(
+                    value: LiveTab.living,
+                    label: Text('直播中'),
+                    icon: Icon(Icons.sensors_rounded, size: 18),
+                  ),
+                  ButtonSegment(
+                    value: LiveTab.upcoming,
+                    label: Text('即将开始'),
+                    icon: Icon(Icons.event_rounded, size: 18),
+                  ),
+                  ButtonSegment(
+                    value: LiveTab.ended,
+                    label: Text('已结束'),
+                    icon: Icon(Icons.history_rounded, size: 18),
+                  ),
+                ],
+                selected: {_tab},
+                onSelectionChanged: (selection) {
+                  setState(() => _tab = selection.first);
+                },
+              ),
+            ),
+            Expanded(
+              child: lives.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      AppExceptionMapper.from(error).message,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return _EmptyLiveView(tab: _tab);
+                  }
+
+                  return RefreshIndicator(
+                    onRefresh: () => ref
+                        .read(liveListControllerProvider(_tab).notifier)
+                        .refresh(),
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final live = items[index];
+                        final canWatch = liveRoomIsWatchable(live);
+
+                        return LiveRoomCard(
+                          live: live,
+                          enabled: canWatch,
+                          onTap: canWatch
+                              ? () => context.push(
+                                    AppRoutes.liveWatch,
+                                    extra: live,
+                                  )
+                              : null,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  String _statusLabel(LiveRoomStatusEnum status) {
-    switch (status) {
-      case LiveRoomStatusEnum.LIVING:
-        return '直播中';
-      case LiveRoomStatusEnum.PUBLISHED:
-        return '即将开始';
-      case LiveRoomStatusEnum.FINISHED:
-        return '已结束';
-      case LiveRoomStatusEnum.PASSED:
-        return '审核通过';
-      case LiveRoomStatusEnum.REVIEW:
-        return '审核中';
-      case LiveRoomStatusEnum.DRAFT:
-        return '草稿';
-      case LiveRoomStatusEnum.REJECTED:
-        return '已驳回';
-      case LiveRoomStatusEnum.OFFLINE:
-        return '已下架';
-    }
+class _EmptyLiveView extends StatelessWidget {
+  const _EmptyLiveView({required this.tab});
+
+  final LiveTab tab;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final message = switch (tab) {
+      LiveTab.living => '当前没有正在进行的直播',
+      LiveTab.upcoming => '暂时没有即将开始的直播',
+      LiveTab.ended => '还没有已结束的直播记录',
+    };
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SizedBox(height: 72),
+        Icon(
+          Icons.live_tv_outlined,
+          size: 56,
+          color: AppTheme.skyBlue.withValues(alpha: 0.55),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            message,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: AppTheme.ink.withValues(alpha: 0.62),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
