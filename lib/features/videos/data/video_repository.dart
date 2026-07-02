@@ -90,4 +90,8 @@ class VideoRepository {
       completed: completed,
     );
   }
+
+  Future<void> deleteComment({required int commentId}) {
+    return remote.deleteComment(commentId: commentId);
+  }
 }

@@ -55,6 +55,8 @@ abstract class VideoRemoteDataSource {
     required int watchedSeconds,
     required bool completed,
   });
+
+  Future<void> deleteComment({required int commentId});
 }
 
 class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
@@ -216,6 +218,17 @@ class OpenApiVideoRemoteDataSource implements VideoRemoteDataSource {
         completed: completed,
       ),
     );
+  }
+
+  @override
+  Future<void> deleteComment({required int commentId}) async {
+    try {
+      await _client.getVideosApi().apiVideosCommentsCommentIdDelete(
+        commentId: commentId.toString(),
+      );
+    } catch (error) {
+      throw AppExceptionMapper.from(error);
+    }
   }
 
   String? _extractMediaUrl(Object? data) {

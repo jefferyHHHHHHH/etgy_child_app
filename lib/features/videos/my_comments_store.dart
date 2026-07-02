@@ -80,6 +80,12 @@ class MyCommentsNotifier extends Notifier<MyCommentsState> {
     await _persist();
   }
 
+  Future<void> removeComment(int commentId) async {
+    final updated = state.comments.where((c) => c.id != commentId).toList();
+    state = state.copyWith(comments: updated, isLoaded: true);
+    await _persist();
+  }
+
   Future<void> refreshFromServer() async {
     if (state.isRefreshing) return;
 

@@ -17,8 +17,12 @@ import '../../../core/widgets/playful_background.dart';
 import '../../auth/auth_controller.dart';
 import '../data/video_repository.dart';
 import '../my_comments_store.dart';
+import '../utils/comment_delete_policy.dart';
 import '../video_comments_controller.dart';
 import '../video_engagement_controller.dart';
+import '../widgets/comment_delete_actions.dart';
+import '../widgets/comment_delete_dialog.dart';
+import '../widgets/comment_resubmit_dialog.dart';
 
 class VideoPlayerPage extends ConsumerStatefulWidget {
   const VideoPlayerPage({super.key, this.video});
@@ -371,75 +375,71 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         ),
       ),
       bottomNavigationBar: AnimatedPadding(
-              duration: const Duration(milliseconds: 160),
-              curve: Curves.easeOut,
-              padding: EdgeInsets.only(bottom: bottomInset),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: _CommentComposer(
-                    controller: _commentController,
-                    onSend: () async {
-                      final text = _commentController.text.trim();
-                      final validation = CommentContentValidator.validate(text);
-                      if (!validation.isValid) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(validation.message!)),
-                        );
-                        return;
-                      }
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: _CommentComposer(
+              controller: _commentController,
+              onSend: () async {
+                final text = _commentController.text.trim();
+                final validation = CommentContentValidator.validate(text);
+                if (!validation.isValid) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(validation.message!)));
+                  return;
+                }
 
-                      try {
-                        final comment = await ref
-                            .read(
-                              videoCommentsControllerProvider(
-                                video.id,
-                              ).notifier,
-                            )
-                            .post(text);
-                        _commentController.clear();
-                        if (!context.mounted) return;
+                try {
+                  final comment = await ref
+                      .read(videoCommentsControllerProvider(video.id).notifier)
+                      .post(text);
+                  _commentController.clear();
+                  if (!context.mounted) return;
 
-                        final message = switch (comment.status) {
-                          VideoCommentStatusEnum.APPROVED => '评论已发布 ✓',
-                          VideoCommentStatusEnum.REJECTED =>
-                            comment.rejectReason?.isNotEmpty == true
-                                ? '评论未通过：${comment.rejectReason}'
-                                : '评论未通过审核',
-                          VideoCommentStatusEnum.PENDING => '评论已提交，正在审核中 ✓',
-                        };
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                    },
-                  ),
-                ),
-              ),
+                  final message = switch (comment.status) {
+                    VideoCommentStatusEnum.APPROVED => '评论已发布 ✓',
+                    VideoCommentStatusEnum.REJECTED =>
+                      comment.rejectReason?.isNotEmpty == true
+                          ? '评论未通过：${comment.rejectReason}'
+                          : '评论未通过审核',
+                    VideoCommentStatusEnum.PENDING => '评论已提交，正在审核中 ✓',
+                  };
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
             ),
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildPlayerArea(BuildContext context, VideoPlayerController? controller) {
+  Widget _buildPlayerArea(
+    BuildContext context,
+    VideoPlayerController? controller,
+  ) {
     final errorMessage = _errorMessage;
     if (errorMessage != null) {
       return _PlayerPlaceholderCard(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '播放失败：$errorMessage',
-              textAlign: TextAlign.center,
-            ),
+            Text('播放失败：$errorMessage', textAlign: TextAlign.center),
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _retryPlayer,
@@ -452,9 +452,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     }
 
     if (controller == null || _initializeFuture == null) {
-      return const _PlayerPlaceholderCard(
-        child: CircularProgressIndicator(),
-      );
+      return const _PlayerPlaceholderCard(child: CircularProgressIndicator());
     }
 
     return _PlayerCard(
@@ -958,8 +956,13 @@ class _CommentComposerState extends State<_CommentComposer> {
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => widget.onSend(),
                     maxLength: _maxLength,
-                    buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-                        const SizedBox.shrink(),
+                    buildCounter:
+                        (
+                          _, {
+                          required currentLength,
+                          required isFocused,
+                          maxLength,
+                        }) => const SizedBox.shrink(),
                     decoration: InputDecoration(
                       hintText: '说点什么吧…',
                       hintStyle: theme.textTheme.bodyMedium,
@@ -971,7 +974,9 @@ class _CommentComposerState extends State<_CommentComposer> {
                 const SizedBox(width: 10),
                 FilledButton(
                   onPressed: isOverLimit ? null : widget.onSend,
-                  style: FilledButton.styleFrom(minimumSize: const Size(86, 44)),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(86, 44),
+                  ),
                   child: const Text('发布'),
                 ),
               ],
@@ -984,7 +989,9 @@ class _CommentComposerState extends State<_CommentComposer> {
                   child: Text(
                     isOverLimit ? '超出 ${-remaining} 字' : '还可输入 $remaining 字',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isOverLimit ? AppTheme.coral : AppTheme.ink.withValues(alpha: 0.45),
+                      color: isOverLimit
+                          ? AppTheme.coral
+                          : AppTheme.ink.withValues(alpha: 0.45),
                     ),
                   ),
                 ),
@@ -1042,7 +1049,12 @@ class _CommentsSection extends ConsumerWidget {
               ...myComments.map(
                 (c) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: _CommentTile(comment: c, showStatus: true),
+                  child: _CommentTile(
+                    videoId: videoId,
+                    comment: c,
+                    showStatus: true,
+                    allowDelete: true,
+                  ),
                 ),
               ),
               const Divider(height: 20),
@@ -1072,7 +1084,12 @@ class _CommentsSection extends ConsumerWidget {
                       .map(
                         (c) => Padding(
                           padding: const EdgeInsets.only(bottom: 10),
-                          child: _CommentTile(comment: c, showStatus: false),
+                          child: _CommentTile(
+                            videoId: videoId,
+                            comment: c,
+                            showStatus: false,
+                            allowDelete: canDeleteOwnComment(ref, c),
+                          ),
                         ),
                       )
                       .toList(growable: false),
@@ -1086,21 +1103,73 @@ class _CommentsSection extends ConsumerWidget {
   }
 }
 
-class _CommentTile extends StatelessWidget {
+class _CommentTile extends ConsumerWidget {
   const _CommentTile({
+    required this.videoId,
     required this.comment,
     this.showStatus = false,
+    this.allowDelete = false,
   });
 
+  final int videoId;
   final VideoComment comment;
   final bool showStatus;
+  final bool allowDelete;
+
+  Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showCommentDeleteDialog(context);
+    if (!confirmed || !context.mounted) return;
+
+    try {
+      await ref
+          .read(videoCommentsControllerProvider(videoId).notifier)
+          .delete(comment.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('评论已删除')));
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppExceptionMapper.from(error).message)),
+      );
+    }
+  }
+
+  Future<void> _handleResubmit(BuildContext context, WidgetRef ref) async {
+    final content = await showCommentResubmitDialog(
+      context,
+      initialContent: comment.content,
+    );
+    if (content == null || !context.mounted) return;
+
+    try {
+      final newComment = await ref
+          .read(videoCommentsControllerProvider(videoId).notifier)
+          .resubmitRejected(original: comment, content: content);
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_commentSubmissionMessage(newComment)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppExceptionMapper.from(error).message)),
+      );
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final status = comment.status;
     final isRejected = status == VideoCommentStatusEnum.REJECTED;
     final author = CommentAuthorDisplay.fromComment(comment);
+    final deletable = allowDelete || canDeleteOwnComment(ref, comment);
 
     String statusText() {
       return switch (status) {
@@ -1118,7 +1187,7 @@ class _CommentTile extends StatelessWidget {
       };
     }
 
-    return DecoratedBox(
+    final tile = DecoratedBox(
       decoration: BoxDecoration(
         color: isRejected
             ? AppTheme.coral.withValues(alpha: 0.05)
@@ -1174,6 +1243,11 @@ class _CommentTile extends StatelessWidget {
                 ),
                 if (showStatus)
                   _StatusPill(text: statusText(), color: statusColor()),
+                if (deletable)
+                  CommentDeleteActions(
+                    compact: true,
+                    onDelete: () => _handleDelete(context, ref),
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -1200,6 +1274,21 @@ class _CommentTile extends StatelessWidget {
                 ],
               ),
             ],
+            if (isRejected) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.icon(
+                  onPressed: () => _handleResubmit(context, ref),
+                  icon: const Icon(Icons.edit_note_rounded, size: 18),
+                  label: const Text('重新提交'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 36),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             Text(
               _formatDateTime(comment.createdAt),
@@ -1210,6 +1299,12 @@ class _CommentTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    return CommentDeleteGestureWrapper(
+      enabled: deletable,
+      onDelete: () => _handleDelete(context, ref),
+      child: tile,
     );
   }
 }
@@ -1275,6 +1370,17 @@ String _formatDateTime(DateTime dt) {
   final hh = local.hour.toString().padLeft(2, '0');
   final mi = local.minute.toString().padLeft(2, '0');
   return '$mm-$dd $hh:$mi';
+}
+
+String _commentSubmissionMessage(VideoComment comment) {
+  return switch (comment.status) {
+    VideoCommentStatusEnum.APPROVED => '评论已重新发布 ✓',
+    VideoCommentStatusEnum.REJECTED =>
+      comment.rejectReason?.isNotEmpty == true
+          ? '评论仍未通过：${comment.rejectReason}'
+          : '评论仍未通过审核',
+    VideoCommentStatusEnum.PENDING => '评论已重新提交，正在审核中 ✓',
+  };
 }
 
 class _FullscreenVideoPage extends StatelessWidget {
