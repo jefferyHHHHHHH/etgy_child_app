@@ -185,6 +185,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
         (userMap['status'] as String?) ?? 'pendingActivation',
       );
       final user = UserProfile(
+        userId: _readUserId(userMap),
         name: _readName(userMap, fallback: account),
         school: (userMap['school'] as String?) ?? '',
         grade: (userMap['grade'] as String?) ?? '',
@@ -214,6 +215,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
         (status == AccountStatus.active);
 
     final user = UserProfile(
+      userId: _readUserId(userMap),
       name: _readName(userMap, fallback: account),
       school: (userMap['school'] as String?) ?? '',
       grade: (userMap['grade'] as String?) ?? '',
@@ -264,6 +266,7 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
     final userMap = _toUserMap(dataMap['user']);
     final status = _parseStatus((userMap['status'] as String?) ?? 'active');
     final user = UserProfile(
+      userId: _readUserId(userMap),
       name: _readName(userMap, fallback: '用户'),
       school: (userMap['school'] as String?) ?? '',
       grade: (userMap['grade'] as String?) ?? '',
@@ -318,5 +321,12 @@ class OpenApiAuthRemoteDataSource implements AuthRemoteDataSource {
       return username;
     }
     return fallback;
+  }
+
+  int? _readUserId(Map<String, dynamic> userMap) {
+    final raw = userMap['id'] ?? userMap['userId'];
+    if (raw is num) return raw.toInt();
+    if (raw is String) return int.tryParse(raw);
+    return null;
   }
 }
